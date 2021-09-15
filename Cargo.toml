@@ -1,0 +1,31 @@
+[package]
+name = "script"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+env_logger ="0.9.0"
+log="0.4.14"
+dotenv = "0.15.0"
+derive_more="0.99.16"
+sqlx = { version = "0.5.7", features = [ "postgres", "migrate", "macros","chrono", "uuid", "runtime-async-std-native-tls" ]}
+rand = "0.8.4"
+actix-web = "3.3.2"
+actix-web-validator = "2.1.1"
+actix-http = "2.2.1"
+actix-service = "1.0.6"
+futures = "0.3.17"
+num_cpus = "1.13.0"
+serde = "1.0.130"
+serde_derive = "1.0.130"
+uuid = {version =  "0.8.2",features = ["v4", "serde"] }
+chrono = {version= "0.4.19", features = ["serde"]}
+base64 = "0.13.0"
+cached ="0.25.0"
+url = {version = "2.2.2", features =["serde"]}
+jsonwebtoken ="7.2.0"
+lazy_static ="1.4.0"
+regex="1.5.4"
+

@@ -13,6 +13,8 @@ mod auth;
 mod config;
 mod db;
 mod handlers;
+mod constants;
+mod error;
 
 use crate::auth::{rbac, RbacPolicy};
 
@@ -57,12 +59,12 @@ async fn main() -> Result<(), Error> {
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
-            .wrap(Condition::new(true, auth::Authenticate))
+            .wrap(Condition::new(false, auth::Authenticate))
             .wrap(Compress::default())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(site::save)
-            .service(site::saver)
+            .service(rbac::save)
     })
     .workers(workers)
     .bind(addr)?

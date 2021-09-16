@@ -67,6 +67,50 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
 }
 
 pub fn check_rbac(rbac_params: RbacParams, app_data: &AppData) -> Result<(), AuthError> {
+  use std::collections::hash_map::DefaultHasher;
+  use std::hash::Hash;
+  use std::hash::Hasher;
+
+  let mut hasher = DefaultHasher::new();
+  let h = rbac_params.hash(&mut hasher);
+  hasher.finish();
   debug!("Checking rbac policy");
-  Ok(())
+  debug!("RbacParam hash {:?}", h);
+  let rbac = &app_data.rbac.lock().unwrap();
+  let path_regex_set = &rbac.path_regex_set;
+  let methods = &rbac.methods;
+  let matches: Vec<usize> = path_regex_set
+    .matches(&rbac_params.path)
+    .into_iter()
+    .collect();
+
+  let mut pass: bool = false;
+  match matches.len() {
+    0 => pass = false,
+    match_idx => {
+      for m in matches {
+        debug!(
+          "Checking for match of {} in {:?}",
+          &rbac_params.method,
+          methods.get(&m)
+        );
+        if methods.get(&m).unwrap().contains(&rbac_params.method) {
+          pass = true;
+          debug!("Found match at index {}.. will break", match_idx);
+          break;
+        }
+      }
+    }
+  };
+
+  match pass {
+    true => {
+      debug!("Route allowed");
+      Ok(())
+    }
+    false => Err(AuthError {
+      err_type: "RBAC".to_string(),
+      err_msg: "Access denied by policy".to_string(),
+    }),
+  }
 }

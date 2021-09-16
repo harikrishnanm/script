@@ -1,15 +1,21 @@
-use crate::auth::RbacPolicy;
 use crate::DBPool;
-use log::{info, error, debug};
-use regex::Regex;
-use std::collections::{HashMap, HashSet};
-use std::iter::FromIterator;
+use actix_web::{
+  post,
+  web::{Data, Json},
+  HttpResponse,
+};
+use futures::TryStreamExt;
+use log::{debug, error, info, trace};
+use regex::RegexSet;
 use serde::Deserialize;
-use actix_web::{HttpResponse, post, web::{Data, Json}};
-use sqlx::Error;
+use sqlx::{Error, Row};
+use std::collections::{HashMap, HashSet};
+use std::convert::TryInto;
+use std::iter::FromIterator;
+use std::sync::Arc;
 
+use crate::auth::Rbac;
 use crate::AppData;
-use crate::error::ScriptError;
 /*
 Step1: Match the path regex
 Step2: Match Method
@@ -18,9 +24,9 @@ Step3: Match user
 Step4: check if the role vectors have joint elements
 */
 #[derive(Deserialize, Debug)]
-pub enum PathMatch{
+pub enum PathMatch {
   STARTSWITH(String),
-  EXACT(String)
+  EXACT(String),
 }
 
 #[derive(Deserialize, Debug)]
@@ -33,11 +39,10 @@ pub struct NewRbacPolicy {
   description: Option<String>,
 }
 
-impl NewRbacPolicy {
-  pub async fn save(self: &Self, db_pool: &DBPool)-> Result<(), Error>{
-
-   debug!("{:?}", self);
-   sqlx::query_as!(
+/*impl NewRbacPolicy {
+  pub async fn save(self: &Self, db_pool: &DBPool) -> Result<(), Error> {
+    debug!("{:?}", self);
+    sqlx::query_as!(
     RbacPolicy,
     "INSERT INTO rbac(path, path_match, method, rbac_role, rbac_user, description, created_by, created, modified)
       VALUES ($1, $2, $3, $4, $5)
@@ -49,47 +54,54 @@ impl NewRbacPolicy {
   )
   .fetch_one(db_pool)
   .await
-
   }
-}
+}*/
 
-pub struct Rbac {
-  regex_list: Vec<Regex>,
-}
-
-pub async fn init(db_pool: &DBPool) -> HashSet<RbacPolicy> {
-  match sqlx::query_as!(
-    RbacPolicy,
-    "SELECT path, path_match, method, rbac_role, rbac_user FROM rbac"
-  )
-  .fetch_all(db_pool)
-  .await
-  {
-    Ok(vals) => {
-      debug!("{} RBAC policies found", vals.len());
-      HashSet::from_iter(vals.into_iter())
-    }
-    Err(e) => {
-      panic!("Error loading RBAC policy. {}", e);
+pub async fn init(db_pool: &DBPool) -> Result<Rbac, Error> {
+  let rows = sqlx::query!("SELECT rbac_id, path_regex, method, rbac_role, rbac_user FROM rbac")
+    .fetch_all(db_pool)
+    .await?;
+  let mut path_regex: Vec<String> = Vec::new();
+  let mut methods: HashMap<usize, Vec<String>> = HashMap::new();
+  let mut idx: usize = 0;
+  for row in rows {
+    let regex_str = row.path_regex;
+    let method = row.method;
+    debug!("Adding {} to set", regex_str);
+    //Check if the pattern is already added.
+    match path_regex.iter().position(|pattern| pattern.eq(&regex_str)) {
+      None => {
+        debug!("No exiting string found...");
+        path_regex.push(regex_str.to_string());
+        methods.insert(idx, vec![method]);
+        idx += 1;
+      }
+      Some(existing_idx) => {
+        debug!("String found at {}.", existing_idx);
+        methods.get_mut(&existing_idx).unwrap().push(method);
+      }
     }
   }
+  trace!("Path_regex_str vector  {:?}", path_regex);
+  trace!("Methods hashmap {:?}", methods);
+
+  let path_regex_set = RegexSet::new(path_regex).unwrap();
+  Ok(Rbac {
+    path_regex_set: path_regex_set,
+    methods: methods,
+  })
 }
 
 #[post("/admin/rbac")]
-pub async fn save(
-  data: Data<AppData>,
-  rbac_policy: Json<NewRbacPolicy>,) -> HttpResponse {
-  
-    match rbac_policy.save(&data.db_pool).await {
-      Ok(_) => {
-        info!("Saved data");
-      }, 
-      Err(e) => {
-        error!("Error creating rbac policy");
-      }
+pub async fn save(data: Data<AppData>, rbac_policy: Json<NewRbacPolicy>) -> HttpResponse {
+  /*match rbac_policy.save(&data.db_pool).await {
+    Ok(_) => {
+      info!("Saved data");
+    }
+    Err(e) => {
+      error!("Error creating rbac policy");
+    }
+  };*/
 
-    };
-  
   HttpResponse::Ok().finish()
 }
-

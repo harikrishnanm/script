@@ -1,4 +1,7 @@
+use regex::RegexSet;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::hash::Hash;
 
 pub mod middleware;
 pub mod rbac;
@@ -26,7 +29,12 @@ pub struct AuthError {
   err_msg: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct Rbac {
+  path_regex_set: RegexSet,
+  methods: HashMap<usize, Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, Hash)]
 pub struct RbacParams {
   path: String,
   method: String,
@@ -34,7 +42,7 @@ pub struct RbacParams {
   rbac_user: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Hash, Eq)]
+/*#[derive(Debug, Serialize, Deserialize, Clone, Hash, Eq)]
 pub struct RbacPolicy {
   path: String,
   path_match: String,
@@ -50,4 +58,4 @@ impl PartialEq for RbacPolicy {
       && self.rbac_role == other.rbac_role
       && self.rbac_user == other.rbac_user
   }
-}
+}*/

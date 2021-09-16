@@ -11,21 +11,20 @@ use std::{io::Error, result::Result};
 
 mod auth;
 mod config;
-mod db;
-mod handlers;
 mod constants;
+mod db;
 mod error;
+mod handlers;
 
-use crate::auth::{rbac, RbacPolicy};
+use crate::auth::{rbac, Rbac};
 
 use crate::handlers::*;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
-pub type RbacPolicySet = HashSet<RbacPolicy>;
 
 pub struct AppData {
     db_pool: DBPool,
-    rbac: Mutex<RbacPolicySet>,
+    rbac: Mutex<Rbac>,
 }
 
 #[actix_web::main]
@@ -48,18 +47,18 @@ async fn main() -> Result<(), Error> {
 
     info!("Reading RBAC");
 
-    let rbac_result = rbac::init(&db_pool).await;
+    let rbac_result = rbac::init(&db_pool).await.unwrap();
 
     let app_data = web::Data::new(AppData {
         db_pool: db_pool.clone(),
-        rbac: Mutex::new(rbac_result.clone()),
+        rbac: Mutex::new(rbac_result),
     });
     info!("Starting app server workers");
 
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
-            .wrap(Condition::new(false, auth::Authenticate))
+            .wrap(Condition::new(true, auth::Authenticate))
             .wrap(Compress::default())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))

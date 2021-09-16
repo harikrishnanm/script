@@ -32,6 +32,8 @@ pub struct AuthError {
 pub struct Rbac {
   path_regex_set: RegexSet,
   methods: HashMap<usize, Vec<String>>,
+  users: HashMap<usize, Vec<String>>,
+  roles: HashMap<usize, Vec<String>>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Hash)]

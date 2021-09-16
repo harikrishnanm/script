@@ -78,7 +78,7 @@ where
         Either::Left(self.service.call(req))
       }
       Err(auth_error) => {
-        error!("Authentication error {:?}", auth_error);
+        debug!("Authentication error {:?}", auth_error);
         let u: actix_web::HttpResponse<B> =
           HttpResponse::Unauthorized().json(auth_error).into_body();
         Either::Right(ok(req.into_response(u)))

@@ -5,7 +5,7 @@ use actix_web::{
 use dotenv::dotenv;
 use env_logger::Env;
 use log::{debug, info};
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use std::{io::Error, result::Result};
 
@@ -25,6 +25,7 @@ pub type DBPool = sqlx::Pool<sqlx::Postgres>;
 pub struct AppData {
     db_pool: DBPool,
     rbac: Mutex<Rbac>,
+    rbac_cache: Mutex<HashMap<String, bool>>,
 }
 
 #[actix_web::main]
@@ -52,6 +53,7 @@ async fn main() -> Result<(), Error> {
     let app_data = web::Data::new(AppData {
         db_pool: db_pool.clone(),
         rbac: Mutex::new(rbac_result),
+        rbac_cache: Mutex::new(HashMap::new()),
     });
     info!("Starting app server workers");
 

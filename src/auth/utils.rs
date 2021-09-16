@@ -1,9 +1,9 @@
+use crate::auth::{AuthError, Claims, Identity, Rbac, RbacParams};
+use crate::AppData;
 use actix_web::dev::ServiceRequest;
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use log::{debug, error, trace};
-
-use crate::auth::{AuthError, Claims, Identity, RbacParams, Rbac};
-use crate::AppData;
+use std::collections::HashMap;
 
 const WILDCARD: &str = r#"*"#;
 
@@ -69,26 +69,32 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
 }
 
 pub fn check_rbac(rbac_params: RbacParams, app_data: &AppData) -> Result<(), AuthError> {
-  use std::collections::hash_map::DefaultHasher;
-  use std::hash::Hash;
-  use std::hash::Hasher;
-
-  let mut hasher = DefaultHasher::new();
-  let h = rbac_params.hash(&mut hasher);
-  hasher.finish();
   debug!("Checking rbac policy");
-  debug!("RbacParam hash {:?}", h);
+
+  let mut rbac_cache = app_data.rbac_cache.lock().unwrap();
+
+  let rbac_hash = rbac_params.hash();
+
   let rbac = &app_data.rbac.lock().unwrap();
   let path_regex_set = &rbac.path_regex_set;
-  let methods = &rbac.methods;
-  let users = &rbac.users;
-  let roles = &rbac.roles;
   let matches: Vec<usize> = path_regex_set
     .matches(&rbac_params.path)
     .into_iter()
     .collect();
 
-  match check_policy(&rbac_params, rbac, &matches) {
+  //This code enables the cache.
+  /*let allow: &bool = match rbac_cache.get(&rbac_hash) {
+    Some(allow) => allow,
+    None => {
+      let al = check_policy(&rbac_params, rbac, &matches);
+      let _ = rbac_cache.insert(rbac_hash.clone(), al);
+      rbac_cache.get(&rbac_hash.clone()).unwrap()
+    }
+  };*/
+
+  let allow = check_policy(&rbac_params, rbac, &matches);
+
+  match &allow {
     true => {
       debug!("Route allowed");
       Ok(())
@@ -107,7 +113,6 @@ fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &Vec<usize>) -> 
   let wildcard = &String::from(WILDCARD);
 
   match matches.len() {
-
     0 => false,
     _ => {
       let (mut method_pass, mut user_pass, mut role_pass) = (false, false, false);
@@ -133,14 +138,14 @@ fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &Vec<usize>) -> 
         role_pass = roles_vec.contains(&wildcard);
         if !role_pass {
           for role in roles_vec {
-            if rbac_params.rbac_role.contains(role){
+            if rbac_params.rbac_role.contains(role) {
               role_pass = true;
               break;
             }
           }
         }
       }
-      method_pass && user_pass && role_pass
+      role_pass && method_pass && user_pass
     }
   }
 }

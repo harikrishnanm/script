@@ -14,7 +14,7 @@ content-type: application/json
 
 # Create RBAC
 
-DELETE http://localhost:8088/site/admin HTTP/1.1
+GET http://localhost:8088/admin HTTP/1.1
 Content-Type: application/json
 Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MzE3Njk0NTMsImV4cCI6MTY2MzMwNTQ1MywiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInJvbGVzIjpbIkNNUyBBRE1JTiIsIkFETUlOIl0sInVzZXIiOiJjbXN1c2VyMSJ9.-ppKailrqrWJZiYUgCXMxoVQbv1l2131M7KllAVZS-M
 

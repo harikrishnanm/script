@@ -44,6 +44,17 @@ pub struct RbacParams {
   rbac_user: String,
 }
 
+impl RbacParams {
+  fn hash(self: &Self) -> String {
+    use fasthash::sea;
+    let mut buf = String::from(&self.path);
+    buf.push_str(&self.method);
+    buf.push_str(&self.rbac_role.join(""));
+    buf.push_str(&self.rbac_user);
+    sea::hash64(&buf.into_bytes()).to_string()
+  }
+}
+
 /*#[derive(Debug, Serialize, Deserialize, Clone, Hash, Eq)]
 pub struct RbacPolicy {
   path: String,

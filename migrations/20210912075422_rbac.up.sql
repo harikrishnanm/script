@@ -27,7 +27,7 @@ CREATE TABLE rbac_audit_log (
 );
 
 INSERT INTO rbac (path_regex, method, rbac_role, rbac_user, description, created_by) 
-  VALUES ('^/admin{1}\b[[/]{1}[-a-zA-Z0-9@:%_+.~#?&/=]{1,}[/]{0,1}]{0,}\b$', 'GET', 'CMS ADMIN', 'cmsadmin', 'Allow admin to GET all /admin/* routes', 'Yoda');
+  VALUES ('^/admin{1}\b[[/]{1}[-a-zA-Z0-9@:%_+.~#?&/=]{1,}[/]{0,1}]{0,}\b$', '*', 'CMS ADMIN', 'cmsadmin', 'Allow admin to GET all /admin/* routes', 'Yoda');
 INSERT INTO rbac (path_regex, method, rbac_role, rbac_user, description, created_by) 
   VALUES ('^/site/admin{1}\b[[/]{1}[-a-zA-Z0-9@:%_+.~#?&/=]{1,}[/]{0,1}]{0,}\b$', 'GET', 'CMS ADMIN', 'cmsadmin', 'Allow admin to GET all /admin/* routes', 'Yoda');
 INSERT INTO rbac (path_regex, method, rbac_role, rbac_user, description, created_by) 
@@ -40,3 +40,5 @@ INSERT INTO rbac (path_regex, method, rbac_role, rbac_user, description, created
   VALUES ('^/site/admin{1}\b[[/]{1}[-a-zA-Z0-9@:%_+.~#?&/=]{1,}[/]{0,1}]{0,}\b$', 'OPTIONS', 'CMS ADMIN', 'cmsadmin', 'Allow admin to GET all /admin/* routes', 'Yoda');
 INSERT INTO rbac (path_regex, method, rbac_role, rbac_user, description, created_by) 
   VALUES ('^/site/admin{1}\b[[/]{1}[-a-zA-Z0-9@:%_+.~#?&/=]{1,}[/]{0,1}]{0,}\b$', 'DELETE', 'CMS ADMIN', 'cmsadmin', 'Allow admin to GET all /admin/* routes', 'Yoda');
+INSERT INTO rbac (path_regex, method, rbac_role, rbac_user, description, created_by) 
+  VALUES ('^/site/admin{1}\b[[/]{1}[-a-zA-Z0-9@:%_+.~#?&/=]{1,}[/]{0,1}]{0,}\b$', '*', 'CMS ADMIN', 'cmsuser1', 'Allow admin to GET all /admin/* routes', 'Yoda');

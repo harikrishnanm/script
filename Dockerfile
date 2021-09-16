@@ -1,4 +1,4 @@
-FROM rust:1.54 as builder
+FROM rust:1.55 as builder
 ENV RUSTFLAGS="-Ctarget-cpu=sandybridge -Ctarget-feature=+aes,+sse2,+sse4.1,+ssse3"
 WORKDIR /workspace
 COPY ./ ./

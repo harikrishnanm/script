@@ -10,7 +10,7 @@ env_logger ="0.9.0"
 log="0.4.14"
 dotenv = "0.15.0"
 derive_more="0.99.16"
-sqlx = { version = "0.5.7", features = [ "postgres", "migrate", "macros","chrono", "uuid", "runtime-async-std-native-tls" ]}
+sqlx = { version = "0.5.7", features = [ "postgres", "migrate", "macros","chrono", "uuid", "runtime-async-std-native-tls", "offline" ]}
 rand = "0.8.4"
 actix-web = "3.3.2"
 actix-web-validator = "2.1.1"

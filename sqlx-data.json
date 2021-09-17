@@ -60,8 +60,26 @@
       ]
     }
   },
-  "8a362142a9683235d847405707c14b79c181bb18da8d75b94d8c06fdff4cd899": {
-    "query": "SELECT rbac_id, path_regex, method, rbac_role, rbac_user FROM rbac",
+  "49a7f8488767ffef12c3ae7ea276314e3666809030e66a8f64977e271f78cedb": {
+    "query": "INSERT INTO rbac(path, path_match, method, rbac_role, rbac_user, description, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
+  "a21ca8d6909da50d4cc033ca76ff63db8509d1e2a1ead0f6d8d206356b6721d2": {
+    "query": "SELECT rbac_id, path, path_match, method, rbac_role, rbac_user FROM rbac",
     "describe": {
       "columns": [
         {
@@ -71,21 +89,26 @@
         },
         {
           "ordinal": 1,
-          "name": "path_regex",
+          "name": "path",
           "type_info": "Varchar"
         },
         {
           "ordinal": 2,
-          "name": "method",
+          "name": "path_match",
           "type_info": "Varchar"
         },
         {
           "ordinal": 3,
-          "name": "rbac_role",
+          "name": "method",
           "type_info": "Varchar"
         },
         {
           "ordinal": 4,
+          "name": "rbac_role",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
           "name": "rbac_user",
           "type_info": "Varchar"
         }
@@ -94,6 +117,7 @@
         "Left": []
       },
       "nullable": [
+        false,
         false,
         false,
         false,

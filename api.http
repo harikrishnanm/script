@@ -3,6 +3,7 @@
 
 POST http://localhost:8088/admin/site HTTP/1.1
 content-type: application/json
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MzE3MTc3NDksImV4cCI6MTY2MzI1Mzc0OSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInVzZXIiOiJ1c2VyMSIsInJvbGVzIjpbIlBBR0VBRE1JTiIsIlNJVEVBRE1JTiJdfQ.E6Ffq8A3NIGYiqpv2nvE5FRlqLmHQGAc7bYdahlf1J4
 
 {
     "name":"corporate",
@@ -14,16 +15,16 @@ content-type: application/json
 
 # Create RBAC
 
-GET http://localhost:8088/admin HTTP/1.1
+POST http://localhost:8088/admin/rbac HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MzE3Njk0NTMsImV4cCI6MTY2MzMwNTQ1MywiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInJvbGVzIjpbIkNNUyBBRE1JTiIsIkFETUlOIl0sInVzZXIiOiJjbXN1c2VyMSJ9.-ppKailrqrWJZiYUgCXMxoVQbv1l2131M7KllAVZS-M
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MzE3MTc3NDksImV4cCI6MTY2MzI1Mzc0OSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInVzZXIiOiJjbXNhZG1pbiIsInJvbGVzIjpbIkNNUyBBRE1JTiIsIkFETUlOIl19.jvdHuFS4OXIFFRqllVF7nUTGBeGQFXY6kp2sVQUe284
 
 {
-    "path":"/admin",
-    "path_match": "STARTSWITH",
+    "path":"/admin/site",
+    "path_match": "EXACT",
     "method": "POST",
-    "rbac_role": "CMSADMIN",
-    "rbac_user": "user",
+    "rbac_role": "SITEADMIN",
+    "rbac_user": "user1",
     "description":""
 }
 

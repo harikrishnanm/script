@@ -72,15 +72,15 @@ pub fn check_rbac(rbac_params: RbacParams, app_data: &AppData) -> Result<(), Aut
   debug!("Checking rbac policy");
 
   let mut rbac_cache = app_data.rbac_cache.lock().unwrap();
-
   let rbac_hash = rbac_params.hash();
-
   let rbac = &app_data.rbac.lock().unwrap();
+  debug!("RBAC policy {:?}", rbac);
   let path_regex_set = &rbac.path_regex_set;
   let matches: Vec<usize> = path_regex_set
     .matches(&rbac_params.path)
     .into_iter()
     .collect();
+  debug!("Route matches vetor {:?}", matches);
 
   //This code enables the cache.
   /*let allow: &bool = match rbac_cache.get(&rbac_hash) {

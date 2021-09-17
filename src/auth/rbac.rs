@@ -32,14 +32,15 @@ pub enum PathMatch {
 #[derive(Deserialize, Debug)]
 pub struct NewRbacPolicy {
   path: String,
-  path_match: String,
+  #[serde(flatten)]
+  path_match: PathMatch,
   method: String,
   rbac_role: String,
   rbac_user: String,
   description: Option<String>,
 }
 
-/*impl NewRbacPolicy {
+impl NewRbacPolicy {
   pub async fn save(self: &Self, db_pool: &DBPool) -> Result<(), Error> {
     debug!("{:?}", self);
     sqlx::query_as!(
@@ -55,9 +56,9 @@ pub struct NewRbacPolicy {
   .fetch_one(db_pool)
   .await
   }
-}*/
+}
 
-pub async fn init(db_pool: &DBPool) -> Result<Rbac, Error> {
+pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
   let rows = sqlx::query!("SELECT rbac_id, path_regex, method, rbac_role, rbac_user FROM rbac")
     .fetch_all(db_pool)
     .await?;
@@ -117,14 +118,13 @@ pub async fn init(db_pool: &DBPool) -> Result<Rbac, Error> {
 
 #[post("/admin/rbac")]
 pub async fn save(data: Data<AppData>, rbac_policy: Json<NewRbacPolicy>) -> HttpResponse {
-  /*match rbac_policy.save(&data.db_pool).await {
-    Ok(_) => {
-      info!("Saved data");
-    }
-    Err(e) => {
-      error!("Error creating rbac policy");
-    }
-  };*/
-
-  HttpResponse::Ok().finish()
+    match rbac_policy.save(&data.db_pool).await {
+      Ok(_) => {
+        info!("Saved data");
+      }
+      Err(e) => {
+        error!("Error creating rbac policy");
+      }
+    };
+    HttpResponse::Ok().finish()
 }

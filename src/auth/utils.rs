@@ -71,8 +71,6 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
 pub fn check_rbac(rbac_params: RbacParams, app_data: &AppData) -> Result<(), AuthError> {
   debug!("Checking rbac policy");
 
-  let mut rbac_cache = app_data.rbac_cache.lock().unwrap();
-  let rbac_hash = rbac_params.hash();
   let rbac = &app_data.rbac.lock().unwrap();
   debug!("RBAC policy {:?}", rbac);
   let path_regex_set = &rbac.path_regex_set;
@@ -115,8 +113,9 @@ fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &Vec<usize>) -> 
   match matches.len() {
     0 => false,
     _ => {
-      let (mut method_pass, mut user_pass, mut role_pass) = (false, false, false);
+      let (mut method_pass, mut user_pass, mut role_pass, mut pass ) = (false, false, false, false);
       for m in matches {
+        debug!("Checking {} out of {:?}", m, matches);
         let methods_vec = methods.get(&m).unwrap();
         method_pass = methods_vec.contains(&wildcard) || methods_vec.contains(&rbac_params.method);
         debug!(
@@ -144,6 +143,7 @@ fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &Vec<usize>) -> 
             }
           }
         }
+        if role_pass && method_pass && user_pass {break;}
       }
       role_pass && method_pass && user_pass
     }

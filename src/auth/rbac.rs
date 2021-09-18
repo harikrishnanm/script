@@ -21,13 +21,6 @@ If there is a match then
 Step3: Match user
 Step4: check if the role vectors have joint elements
 */
-#[derive(Deserialize, Debug, sqlx::Type)]
-#[sqlx(type_name = "path_match_enum", rename_all = "UPPERCASE")]
-pub enum PathMatch {
-  STARTSWITH,
-  EXACT,
-}
-
 #[derive(Deserialize, Debug)]
 pub struct NewRbacPolicy {
   path: String,

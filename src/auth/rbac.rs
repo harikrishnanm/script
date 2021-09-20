@@ -1,19 +1,21 @@
 use crate::DBPool;
 use actix_web::{
   post, web,
-  web::{Data, Json},
+  web::{Data},
   HttpResponse,
 };
+use actix_web_validator::Json;
 use log::{debug, error, info, trace};
 use regex::RegexSet;
 use serde::Deserialize;
 use sqlx::Error;
 use std::collections::HashMap;
-use std::sync::Mutex;
+use validator::Validate;
 
 use crate::auth::{Identity, Rbac};
 use crate::constants;
 use crate::AppData;
+use crate::validators::*;
 /*
 Step1: Match the path regex
 Step2: Match Method
@@ -21,18 +23,38 @@ If there is a match then
 Step3: Match user
 Step4: check if the role vectors have joint elements
 */
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Validate)]
 pub struct NewRbacPolicy {
+  #[validate (length(min = 1, max = 25))]
   path: String,
+  #[validate (custom = "validate_path_match")]
   path_match: String,
+  #[validate (custom = "validate_method_match")]
   method: String,
   rbac_role: String,
   rbac_user: String,
+  #[validate (length(max = 100))]
   description: Option<String>,
 }
 
 impl NewRbacPolicy {
-  pub async fn save(self: &Self, db_pool: &DBPool, identity: Identity) -> Result<(), Error> {
+
+  pub fn new(path: &str, path_match: &str, method: &str, rbac_role: &str, rbac_user: &str, description: Option<&str>) -> Self{
+    debug!("Constructing new rbac policy struct");
+    Self{
+      path: path.to_string(),
+      path_match: path_match.to_string(),
+      method: method.to_string(),
+      rbac_role: rbac_role.to_string(),
+      rbac_user: rbac_user.to_string(),
+      description: match description {
+        Some(desc) => Some(desc.to_string()),
+        None => None
+      }
+    }
+  }
+
+  pub async fn save(self: &Self, db_pool: &DBPool, identity: &Identity) -> Result<(), Error> {
     debug!("{:?}", self);
 
     let description = match &self.description {
@@ -66,7 +88,7 @@ pub async fn save(
   rbac_policy: Json<NewRbacPolicy>,
   identity: web::ReqData<Identity>,
 ) -> HttpResponse {
-  match rbac_policy.save(&data.db_pool, identity.into_inner()).await {
+  match rbac_policy.save(&data.db_pool, &identity.into_inner()).await {
     Ok(_) => {
       info!("Saved data");
       //Refresh the cache
@@ -106,11 +128,11 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
     let path_match = row.path_match;
 
     let mut regex_str = constants::REGEX_PREFIX.to_string();
-    &regex_str.push_str(&path);
+    let _ = &regex_str.push_str(&path);
     if path_match == constants::EXACT {
-      &regex_str.push_str(constants::REGEX_EXACT_SUFFIX);
+      let _ = &regex_str.push_str(constants::REGEX_EXACT_SUFFIX);
     } else if path_match == constants::STARTSWITH {
-      &regex_str.push_str(constants::REGEX_STARTSWITH_SUFFIX);
+      let _ = &regex_str.push_str(constants::REGEX_STARTSWITH_SUFFIX);
     }
 
     debug!("Adding {} to set", regex_str);

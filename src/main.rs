@@ -15,6 +15,7 @@ mod constants;
 mod db;
 mod error;
 mod handlers;
+mod validators;
 
 use crate::auth::{rbac, Rbac};
 

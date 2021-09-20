@@ -1,5 +1,7 @@
 ## Script CMS 
 
+Note: This is a work in progress and incomplete in many respects. 
+
 A Headless CMS written entirely in Rust
 
 ### Architecture

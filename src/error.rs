@@ -7,7 +7,6 @@ use serde_derive::Serialize;
 pub enum ScriptError {
   #[display(fmt = "Error creating rbac policy")]
   RbacCreationError,
-  
 }
 
 #[derive(Serialize)]

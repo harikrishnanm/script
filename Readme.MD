@@ -2,9 +2,9 @@
 
 SCRIPT HEADLESS CMS
 
-Script CMS heirarchy
+Script CMS URL Paths
 
-Site
-
-> > Collections
-> > Content
+URL | Method | Description | Default Role 
+------------ | ------------- | ------------- | -------------
+/admin/rbac | POST | CMS ADMIN | Used to create RBAC policies
+/admin/rbac | GET | CMS ADMIN | Used to list RBAC policies

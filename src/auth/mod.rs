@@ -28,7 +28,7 @@ pub struct AuthError {
   err_type: String,
   err_msg: String,
 }
-
+#[derive(Debug)]
 pub struct Rbac {
   path_regex_set: RegexSet,
   methods: HashMap<usize, Vec<String>>,

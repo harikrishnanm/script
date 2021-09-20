@@ -71,16 +71,14 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
 pub fn check_rbac(rbac_params: RbacParams, app_data: &AppData) -> Result<(), AuthError> {
   debug!("Checking rbac policy");
 
-  let mut rbac_cache = app_data.rbac_cache.lock().unwrap();
-
-  let rbac_hash = rbac_params.hash();
-
   let rbac = &app_data.rbac.lock().unwrap();
+  debug!("RBAC policy {:?}", rbac);
   let path_regex_set = &rbac.path_regex_set;
   let matches: Vec<usize> = path_regex_set
     .matches(&rbac_params.path)
     .into_iter()
     .collect();
+  debug!("Route matches vetor {:?}", matches);
 
   //This code enables the cache.
   /*let allow: &bool = match rbac_cache.get(&rbac_hash) {
@@ -115,37 +113,38 @@ fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &Vec<usize>) -> 
   match matches.len() {
     0 => false,
     _ => {
-      let (mut method_pass, mut user_pass, mut role_pass) = (false, false, false);
+      let mut pass = false ;
       for m in matches {
+        debug!("Checking {} out of {:?}", m, matches);
         let methods_vec = methods.get(&m).unwrap();
-        method_pass = methods_vec.contains(&wildcard) || methods_vec.contains(&rbac_params.method);
+        pass = methods_vec.contains(&wildcard) || methods_vec.contains(&rbac_params.method);
         debug!(
-          "Checking for method match of {} in {:?}: {}",
+          "Checking for method match of {} in {:?} completed with {}",
           &rbac_params.method,
           methods.get(&m),
-          method_pass
+          pass
         );
         let users_vec = users.get(&m).unwrap();
-        user_pass = users_vec.contains(&wildcard) || users_vec.contains(&rbac_params.rbac_user);
+        pass = pass && (users_vec.contains(&wildcard) || users_vec.contains(&rbac_params.rbac_user));
         debug!(
-          "Checking for user match of {} in {:?}: {}",
+          "Checking for user match of {} in {:?} completed with {}",
           &rbac_params.rbac_user,
           users.get(&m),
-          user_pass
+          pass
         );
 
         let roles_vec = roles.get(&m).unwrap();
-        role_pass = roles_vec.contains(&wildcard);
-        if !role_pass {
+        if ! (pass && roles_vec.contains(&wildcard)) {
           for role in roles_vec {
-            if rbac_params.rbac_role.contains(role) {
-              role_pass = true;
+            if !rbac_params.rbac_role.contains(role) {
+              pass = false;
               break;
             }
           }
         }
+        if pass {break;}
       }
-      role_pass && method_pass && user_pass
+      pass
     }
   }
 }

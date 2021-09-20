@@ -48,7 +48,7 @@ async fn main() -> Result<(), Error> {
 
     info!("Reading RBAC");
 
-    let rbac_result = rbac::init(&db_pool).await.unwrap();
+    let rbac_result = rbac::load(&db_pool).await.unwrap();
 
     let app_data = web::Data::new(AppData {
         db_pool: db_pool.clone(),

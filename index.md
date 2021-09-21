@@ -13,6 +13,16 @@ All data will be exposed as REST APIs.
 
 JWTs in the Authorization Bearer header is used for RBAC. The verification of the JWT will be done against a jwks url specified in the JWKS_URL environment variable. (For development, HMAC + SHA256 with the key as 123456 is used). 
 
+Paths
+
+/admin/rbac is the only path that is enabled by default. This can be used to create new policies. 
+
+/admin/site can be used to create new site. 
+
+GET /site/:sitename can be used to read site details
+PUT /site/:sitename can be used to update site details
+DELETE /site/:sitename can be used to delete site and related policies
+
 
 ### Data Model
 

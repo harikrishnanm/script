@@ -70,6 +70,8 @@ where
       rbac_user: identity.user.to_string(),
     };
 
+    debug!("Rbac Params {:?}", rbac_params);
+
     let app_data = req.app_data::<Data<AppData>>().unwrap();
 
     match utils::check_rbac(rbac_params, app_data) {

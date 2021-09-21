@@ -67,6 +67,8 @@ async fn main() -> Result<(), Error> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(site::save)
             .service(rbac::save)
+            .service(root::get_site)
+            .service(query::scoped_query)
     })
     .workers(workers)
     .bind(addr)?

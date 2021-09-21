@@ -5,17 +5,17 @@ use actix_web::{
   HttpResponse,
 };
 use actix_web_validator::Json;
-use log::{debug, error, info, trace};
+use log::*;
 use regex::RegexSet;
-use serde::Deserialize;
+
 use sqlx::Error;
 use std::collections::HashMap;
-use validator::Validate;
 
-use crate::auth::{Identity, Rbac};
+
+use crate::auth::{Identity, Rbac, NewRbacPolicy};
 use crate::constants;
 use crate::AppData;
-use crate::validators::*;
+
 /*
 Step1: Match the path regex
 Step2: Match Method
@@ -23,64 +23,7 @@ If there is a match then
 Step3: Match user
 Step4: check if the role vectors have joint elements
 */
-#[derive(Deserialize, Debug, Validate)]
-pub struct NewRbacPolicy {
-  #[validate (length(min = 1, max = 25))]
-  path: String,
-  #[validate (custom = "validate_path_match")]
-  path_match: String,
-  #[validate (custom = "validate_method_match")]
-  method: String,
-  rbac_role: String,
-  rbac_user: String,
-  #[validate (length(max = 100))]
-  description: Option<String>,
-}
 
-impl NewRbacPolicy {
-
-  pub fn new(path: &str, path_match: &str, method: &str, rbac_role: &str, rbac_user: &str, description: Option<&str>) -> Self{
-    debug!("Constructing new rbac policy struct");
-    Self{
-      path: path.to_string(),
-      path_match: path_match.to_string(),
-      method: method.to_string(),
-      rbac_role: rbac_role.to_string(),
-      rbac_user: rbac_user.to_string(),
-      description: match description {
-        Some(desc) => Some(desc.to_string()),
-        None => None
-      }
-    }
-  }
-
-  pub async fn save(self: &Self, db_pool: &DBPool, identity: &Identity) -> Result<(), Error> {
-    debug!("{:?}", self);
-
-    let description = match &self.description {
-      Some(desc) => desc,
-      None => "",
-    };
-
-    match sqlx::query!(
-      "INSERT INTO rbac(path, path_match, method, rbac_role, rbac_user, description, created_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      &self.path,
-      &self.path_match,
-      &self.method,
-      &self.rbac_role,
-      &self.rbac_user,
-      &description,
-      identity.user
-    )
-    .execute(db_pool)
-    .await
-    {
-      Ok(_) => Ok(()),
-      Err(e) => Err(e),
-    }
-  }
-}
 
 #[post("/admin/rbac")]
 pub async fn save(
@@ -88,6 +31,7 @@ pub async fn save(
   rbac_policy: Json<NewRbacPolicy>,
   identity: web::ReqData<Identity>,
 ) -> HttpResponse {
+  info!("Creating new RBAC policy");
   match rbac_policy.save(&data.db_pool, &identity.into_inner()).await {
     Ok(_) => {
       info!("Saved data");

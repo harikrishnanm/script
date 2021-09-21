@@ -105,6 +105,9 @@ pub fn check_rbac(rbac_params: RbacParams, app_data: &AppData) -> Result<(), Aut
 }
 
 fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &Vec<usize>) -> bool {
+
+  debug!("RBAC params {:?}", rbac_params);
+
   let methods = &rbac.methods;
   let users = &rbac.users;
   let roles = &rbac.roles;
@@ -135,7 +138,9 @@ fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &Vec<usize>) -> 
 
         let roles_vec = roles.get(&m).unwrap();
         if ! (pass && roles_vec.contains(&wildcard)) {
+          debug!("Wildcard match failed...checking individual role");
           for role in roles_vec {
+            debug!("Checking match of request role with {}", role);
             if !rbac_params.rbac_role.contains(role) {
               pass = false;
               break;

@@ -1,65 +1,5 @@
 {
   "db": "PostgreSQL",
-  "3ffaf9a3feed97b049035b4a8f03e3d4ba601532bed00f3bc9f684f2e0720898": {
-    "query": "INSERT INTO site (id, name, url, cors_enabled, created_by)\n        VALUES ($1, $2, $3, $4, $5)\n          RETURNING id, name, url, cors_enabled, created_by, created, modified",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "url",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "cors_enabled",
-          "type_info": "Bool"
-        },
-        {
-          "ordinal": 4,
-          "name": "created_by",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 5,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 6,
-          "name": "modified",
-          "type_info": "Timestamp"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "Varchar",
-          "Bool",
-          "Varchar"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        true,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "49a7f8488767ffef12c3ae7ea276314e3666809030e66a8f64977e271f78cedb": {
     "query": "INSERT INTO rbac(path, path_match, method, rbac_role, rbac_user, description, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)",
     "describe": {
@@ -120,6 +60,80 @@
         false,
         false,
         false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "fc40ac56d4feb8a27c8492c2e94ea32c790552588fb8049f48511d8f7f0c1c03": {
+    "query": "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)\n            VALUES ($1, $2, $3, $4, $5, $6, $7)\n              RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "slug",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "url",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "cors_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Bool",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
         false,
         false,
         false

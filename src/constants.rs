@@ -11,3 +11,6 @@ pub const REGEX_PUBLIC_PREFIX: &str = r#"^/public{1}"#;
 
 pub const EXACT: &str = "EXACT";
 pub const STARTSWITH: &str = "STARTSWITH";
+
+
+pub const WILDCARD: &str = "*";

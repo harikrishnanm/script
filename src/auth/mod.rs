@@ -3,7 +3,7 @@ use crate::DBPool;
 use log::*;
 use regex::RegexSet;
 use serde::{Deserialize, Serialize};
-use sqlx::{Error, Postgres, Transaction};
+use sqlx::{Error, Transaction};
 use std::collections::HashMap;
 use std::hash::Hash;
 use validator::Validate;
@@ -103,7 +103,6 @@ impl NewRbacPolicy {
     }
   }
 
-
   pub async fn save(self: &Self, db_pool: &DBPool, identity: &Identity) -> Result<(), Error> {
     debug!("{:?}", self);
 
@@ -131,8 +130,11 @@ impl NewRbacPolicy {
     }
   }
 
-
-  pub async fn save_tx(self: &Self, mut tx: sqlx::Transaction<'_, sqlx::Postgres>, identity: &Identity) -> Result<(), Error> {
+  pub async fn save_tx(
+    self: &Self,
+    mut tx: sqlx::Transaction<'_, sqlx::Postgres>,
+    identity: &Identity,
+  ) -> Result<(), Error> {
     debug!("{:?}", self);
 
     let description = match &self.description {
@@ -154,17 +156,11 @@ impl NewRbacPolicy {
     .execute(&mut tx)
     .await
     {
-      Ok(_) => {
-        match tx.commit().await {
-          Ok(_) => Ok(()),
-          Err(e) => Err(e)
-        }
-      }
-      ,
+      Ok(_) => Ok(()),
       Err(e) => {
-        tx.rollback().await;
+        error!("Error saving rbac {}", e);
         Err(e)
-      },
+      }
     }
   }
 }

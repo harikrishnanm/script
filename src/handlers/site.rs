@@ -1,4 +1,7 @@
+use crate::auth::Authority;
 use crate::auth::Identity;
+use crate::auth::NewRbacPolicy;
+use crate::constants;
 use crate::AppData;
 use crate::DBPool;
 use actix_web::{post, web, HttpResponse};
@@ -6,11 +9,8 @@ use chrono::NaiveDateTime;
 use log::{debug, error, info, trace};
 use serde::{Deserialize, Serialize};
 use sqlx::Error;
-use uuid::Uuid;
 use sqlx::{Postgres, Transaction};
-use crate::auth::Authority;
-use crate::auth::NewRbacPolicy;
-use crate::constants;
+use uuid::Uuid;
 
 const OWNER: &str = "O";
 const SITE_BASE_PATH: &str = "/site/";
@@ -39,88 +39,82 @@ pub struct Site {
 }
 
 impl NewSite {
-
   pub async fn save(self: &Self, identity: Identity, db_pool: &DBPool) -> Result<Site, Error> {
-    //TODO: validate url.
-
-    let url = 
-
     //Start first transaction
 
-    match db_pool.begin().await {
-      Ok(mut tx) => {
-
-        let site_id = uuid::Uuid::new_v4();
-        match sqlx::query_as!(
-          Site,
-          "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)
-            VALUES ($1, $2, $3, $4, $5, $6, $7)
-              RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
-          site_id,
-          &self.name,
-          &self.path,
-          match &self.slug {
-            Some(slug) => slug,
-            None => ""
-          },
-          match &self.url {
-            Some(url) => url,
-            None => "",
-          },
-          self.cors_enabled,
-          identity.user
-        )
-        .fetch_one(&mut tx)
-        .await {
-          Ok(new_site) => {
-            // First sql done...
-            match db_pool.begin().await {
-              Ok(mut nested_tx) => {
-                //Create RBAC policy
-                let mut site_path = SITE_BASE_PATH.to_owned();
-                let user = &identity.user;
-                site_path.push_str(&self.name);
-                let default_rbac_policy = NewRbacPolicy {
-                  path: site_path,
-                  path_match: "EXACT".to_string(),
-                  method: constants::WILDCARD.to_string(),
-                  rbac_user: user.to_string(),
-                  rbac_role: constants::WILDCARD.to_string(),
-                  description: None,
-                };
-
-                match default_rbac_policy.save_tx(nested_tx, &identity).await {
-                  Ok(_) => {
-                    debug!("Created rbac policy");
-                    tx.commit().await;
-                    return Ok(new_site)
-                  },
-                  Err(e) => {
-                    error!("Error creating RBAC policy {}", e);
-                    tx.rollback().await;
-                    return Err(e);
-                  }
-                }
-              },
-              Err(e) => {
-                error!("Error starting nested transaction");
-                tx.rollback().await;
-                return Err(e);
-              }
-            }
-          },
-          Err(e) => {
-            error!("Error creating site {}", e);
-            tx.rollback().await;
-            return Err(e);
-          }
-        }
-      },
+    let mut tx = match db_pool.begin().await {
+      Ok(tx) => tx,
       Err(e) => {
-        error!("Error starting outer transaction: {}", e);
+        error!("Could not start transaction {}", e);
+        return Err(e); //Error out
+      }
+    };
+
+    let site_id = uuid::Uuid::new_v4();
+    let new_site = match sqlx::query_as!(
+      Site,
+      "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)
+          VALUES ($1, $2, $3, $4, $5, $6, $7)
+            RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
+      site_id,
+      &self.name,
+      &self.path,
+      match &self.slug {
+        Some(slug) => slug,
+        None => "",
+      },
+      match &self.url {
+        Some(url) => url,
+        None => "",
+      },
+      self.cors_enabled,
+      identity.user
+    )
+    .fetch_one(&mut tx)
+    .await
+    {
+      Ok(new_site) => new_site,
+      Err(e) => {
+        error!("Error saving site data {}", e);
         return Err(e);
       }
     };
+
+    let mut site_path = SITE_BASE_PATH.to_owned();
+    let user = &identity.user;
+    site_path.push_str(&self.name);
+
+    // Create new RBAC Policy
+    let default_rbac_policy = NewRbacPolicy {
+      path: site_path,
+      path_match: "EXACT".to_string(),
+      method: constants::WILDCARD.to_string(),
+      rbac_user: user.to_string(),
+      rbac_role: constants::WILDCARD.to_string(),
+      description: None,
+    };
+    // cant use tx here coz its already moved.
+    let mut rbac_tx = match db_pool.begin().await {
+      Ok(rbac_tx) => rbac_tx,
+      Err(e) => {
+        error!("Could not start transaction {}", e);
+        tx.rollback().await;
+        return Err(e); //Error out
+      }
+    };
+
+    match default_rbac_policy.save_tx(tx, &identity).await {
+      Ok(_) => {
+        debug!("Created rbac policy");
+        rbac_tx.commit().await;
+        return Ok(new_site);
+      }
+      Err(e) => {
+        error!("Error creating RBAC policy {}", e);
+        rbac_tx.rollback().await;
+        return Err(e);
+      }
+    }
   }
 }
 

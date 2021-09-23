@@ -6,7 +6,7 @@ use actix_web::{web::Data, Error, HttpMessage, HttpResponse};
 use futures::future::{ok, Either, Ready};
 use log::{debug, error, trace};
 
-use crate::auth::{utils, Authenticate, RbacParams};
+use crate::rbac::{utils, Authenticate, RbacParams};
 use crate::AppData;
 
 impl<S, B> Transform<S> for Authenticate

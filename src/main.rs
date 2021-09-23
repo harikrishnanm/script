@@ -6,22 +6,19 @@ use dotenv::dotenv;
 use env_logger::Env;
 use log::{debug, info};
 use std::collections::HashMap;
-use std::sync::{Mutex};
+use std::sync::Mutex;
 use std::{io::Error, result::Result};
 
-mod auth;
 mod config;
 mod constants;
 mod db;
 mod error;
-mod handlers;
-mod validators;
-
-use crate::auth::{rbac, Rbac};
-
-use crate::handlers::*;
+mod rbac;
+mod site;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
+
+use crate::rbac::models::*;
 
 pub struct AppData {
     db_pool: DBPool,
@@ -61,7 +58,7 @@ async fn main() -> Result<(), Error> {
     HttpServer::new(move || {
         App::new()
             .app_data(app_data.clone())
-            .wrap(Condition::new(true, auth::Authenticate))
+            .wrap(Condition::new(true, Authenticate))
             .wrap(Compress::default())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
@@ -70,14 +67,9 @@ async fn main() -> Result<(), Error> {
             .service(rbac::update)
             .service(rbac::delete)
             .service(rbac::get_all)
-            .service(root::get_site)
-            .service(query::scoped_query)
     })
     .workers(workers)
     .bind(addr)?
     .run()
     .await
 }
-
-
-

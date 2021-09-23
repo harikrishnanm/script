@@ -1,4 +1,4 @@
-use crate::auth::{AuthError, Claims, Identity, Rbac, RbacParams};
+use crate::rbac::models::{AuthError, Claims, Identity, Rbac, RbacParams};
 use crate::AppData;
 use actix_web::dev::ServiceRequest;
 use jsonwebtoken::{decode, DecodingKey, Validation};
@@ -22,7 +22,7 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
             let token_str = match bearer_token.to_str() {
                 Ok(value) => {
                     if value.starts_with("bearer") || value.starts_with("Bearer") {
-                        value[6..value.len()].trim() 
+                        value[6..value.len()].trim()
                     } else {
                         error!("Invalid token string. Does not start with Bearer or bearer");
                         return Err(AuthError {
@@ -126,8 +126,7 @@ fn check_policy(rbac_params: &RbacParams, rbac: &Rbac, matches: &[usize]) -> boo
                 );
                 let users_vec = users.get(m).unwrap();
                 pass = pass
-                    && (users_vec.contains(wildcard)
-                        || users_vec.contains(&rbac_params.rbac_user));
+                    && (users_vec.contains(wildcard) || users_vec.contains(&rbac_params.rbac_user));
                 debug!(
                     "Checking for user match of {} in {:?} completed with {}",
                     &rbac_params.rbac_user,

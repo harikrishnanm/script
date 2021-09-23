@@ -1,6 +1,12 @@
+pub mod middleware;
+pub mod models;
+pub mod rbac;
+pub mod utils;
+pub mod validators;
+
 use crate::DBPool;
 use actix_web::{
-  delete, post, put, get, web,
+  delete, get, post, put, web,
   web::{Data, Path, ReqData},
   HttpResponse,
 };
@@ -10,24 +16,23 @@ use regex::RegexSet;
 use sqlx::Error;
 use std::collections::HashMap;
 use uuid::Uuid;
-use std::future::Future;
 
-use crate::auth::{Identity, NewRbacPolicy, Rbac, RbacPolicy, RbacPolicyRequest};
 use crate::constants;
 use crate::AppData;
+use models::*;
 
-pub async fn reload_rbac(data: &AppData)-> Result<(), Error>{
+pub async fn reload_rbac(data: &AppData) -> Result<(), Error> {
   debug!("Reloading rbac policies");
-    match load(&data.db_pool).await {
-      Ok(rbac) => {
-        debug!("Loaded new RBAC set");
-        *data.rbac.lock().unwrap() = rbac;
-        Ok(())
-      }
-      Err(e) => {
-        error!("Error refreshing data {}", e);
-        Err(e)
-      }
+  match load(&data.db_pool).await {
+    Ok(rbac) => {
+      debug!("Loaded new RBAC set");
+      *data.rbac.lock().unwrap() = rbac;
+      Ok(())
+    }
+    Err(e) => {
+      error!("Error refreshing data {}", e);
+      Err(e)
+    }
   }
 }
 
@@ -37,15 +42,11 @@ pub async fn get_rbac_by_id(
   data: Data<AppData>,
   Path(rbac_id): Path<Uuid>,
 ) -> HttpResponse {
-
   HttpResponse::Ok().finish()
 }
 
 #[get("/admin/rbac")]
-pub async fn get_all(
-  identity: ReqData<Identity>,
-  data: Data<AppData>
-) -> HttpResponse {
+pub async fn get_all(identity: ReqData<Identity>, data: Data<AppData>) -> HttpResponse {
   debug!("Getting all rbac entires");
   let result  = match sqlx::query_as!(RbacPolicy, "SELECT rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified, modified_by FROM rbac").fetch_all(&data.db_pool).await {
     Ok(result) => result,
@@ -55,8 +56,6 @@ pub async fn get_all(
     }
   };
   HttpResponse::Ok().json(result)
-
-
 }
 
 #[delete("/admin/rbac/{rbac_id}")]
@@ -72,16 +71,16 @@ pub async fn delete(
   let rows_deleted = sqlx::query("DELETE FROM rbac WHERE rbac_id = $1")
     .bind(rbac_id)
     .execute(db_pool)
-    .await.unwrap().rows_affected();
+    .await
+    .unwrap()
+    .rows_affected();
 
   match rows_deleted {
-    0 => {
-      HttpResponse::InternalServerError().finish()
-    },
+    0 => HttpResponse::InternalServerError().finish(),
     _ => {
       reload_rbac(&data).await;
       HttpResponse::Ok().finish()
-    } 
+    }
   }
 }
 

@@ -290,5 +290,71 @@
         false
       ]
     }
+  },
+  "f09f44108e2510c2f43ee09ca0a8862e1d3dab1243b4a506e0e772f7aaa89efb": {
+    "query": "SELECT rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified, modified_by FROM rbac",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "rbac_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "path_match",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "method",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "rbac_role",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "rbac_user",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "description",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
+      ]
+    }
   }
 }

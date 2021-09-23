@@ -12,7 +12,7 @@ use sqlx::Error;
 use uuid::Uuid;
 
 use crate::error::ErrorResponse;
-
+use crate::rbac;
 const OWNER: &str = "O";
 const SITE_BASE_PATH: &str = "/site/";
 
@@ -125,7 +125,10 @@ pub async fn save(
     trace!("Identity {:?}", identity);
 
     match site.save(identity.into_inner(), &data.db_pool).await {
-        Ok(r) => HttpResponse::Created().json(r),
+        Ok(r) => {
+          rbac::reload_rbac(&data).await;
+          HttpResponse::Created().json(r)
+        },
         Err(e) => {
             error!("{}", e);
             let err_response = ErrorResponse {

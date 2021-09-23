@@ -10,6 +10,7 @@ use std::collections::HashMap;
 use std::hash::Hash;
 use uuid::Uuid;
 use validator::Validate;
+use crate::AppData;
 
 pub mod middleware;
 pub mod rbac;
@@ -121,7 +122,7 @@ impl NewRbacPolicy {
     pub async fn save_tx(
         self: &Self,
         tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-        identity: &Identity,
+        identity: &Identity
     ) -> Result<(), Error> {
         debug!("{:?}", self);
 
@@ -144,7 +145,9 @@ impl NewRbacPolicy {
         .execute(tx)
         .await
         {
-            Ok(_) => Ok(()),
+            Ok(_) => {
+                Ok(())
+            },
             Err(e) => {
                 error!("Error saving rbac {}", e);
                 Err(e)
@@ -165,8 +168,10 @@ pub struct RbacPolicy {
     pub rbac_role: String,
     pub rbac_user: String,
     #[validate(length(max = 100))]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     pub modified: NaiveDateTime,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub modified_by: Option<String>,
 }
 

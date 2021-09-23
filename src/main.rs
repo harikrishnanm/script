@@ -68,6 +68,8 @@ async fn main() -> Result<(), Error> {
             .service(site::save)
             .service(rbac::save)
             .service(rbac::update)
+            .service(rbac::delete)
+            .service(rbac::get_all)
             .service(root::get_site)
             .service(query::scoped_query)
     })

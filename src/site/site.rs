@@ -1,36 +1,15 @@
 use crate::constants;
 use crate::DBPool;
-use chrono::NaiveDateTime;
+
 use log::*;
-use serde::{Deserialize, Serialize};
+
 use sqlx::Error;
-use uuid::Uuid;
 
 use crate::rbac::models::*;
 const OWNER: &str = "O";
 const SITE_BASE_PATH: &str = "/site/";
 
-#[derive(Deserialize, Debug)]
-pub struct NewSite {
-  pub name: String,
-  pub path: String,
-  pub slug: Option<String>,
-  pub url: Option<String>,
-  pub cors_enabled: Option<bool>,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Site {
-  site_id: Uuid,
-  name: String,
-  path: String,
-  slug: Option<String>,
-  url: Option<String>,
-  cors_enabled: Option<bool>,
-  created_by: String,
-  created: NaiveDateTime,
-  modified: NaiveDateTime,
-}
+use crate::site::models::*;
 
 impl NewSite {
   pub async fn save(self: &Self, identity: Identity, db_pool: &DBPool) -> Result<Site, Error> {

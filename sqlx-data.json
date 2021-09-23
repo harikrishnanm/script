@@ -92,6 +92,157 @@
       "nullable": []
     }
   },
+  "923bcc704dfc433e1b3d2127135df9153f87cbb22bb09238bac58c7a2ad2f08e": {
+    "query": "UPDATE rbac SET path = $1, path_match = $2, method = $3, rbac_role = $4, rbac_user = $5, description = $6, modified_by = $8, modified = $7\n        WHERE rbac_id = $9 RETURNING rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified_by, modified",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "rbac_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "path_match",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "method",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "rbac_role",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "rbac_user",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "description",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Timestamp",
+          "Varchar",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ]
+    }
+  },
+  "a1a1691f3ba09052a365b9a396bae070682189a242440b22c9c210d5b28baba7": {
+    "query": "INSERT INTO rbac(rbac_id, path, path_match, method, rbac_role, rbac_user, description, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n          RETURNING rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified_by, modified",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "rbac_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "path_match",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "method",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "rbac_role",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "rbac_user",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "description",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ]
+    }
+  },
   "a21ca8d6909da50d4cc033ca76ff63db8509d1e2a1ead0f6d8d206356b6721d2": {
     "query": "SELECT rbac_id, path, path_match, method, rbac_role, rbac_user FROM rbac",
     "describe": {
@@ -99,7 +250,7 @@
         {
           "ordinal": 0,
           "name": "rbac_id",
-          "type_info": "Int4"
+          "type_info": "Uuid"
         },
         {
           "ordinal": 1,

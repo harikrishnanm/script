@@ -8,7 +8,6 @@ use log::*;
 use crate::auth::Identity;
 use crate::AppData;
 
-
 #[get("/query/{scope}")]
 pub async fn scoped_query(
     identity: ReqData<Identity>,

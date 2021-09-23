@@ -6,7 +6,7 @@ use dotenv::dotenv;
 use env_logger::Env;
 use log::{debug, info};
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
+use std::sync::{Mutex};
 use std::{io::Error, result::Result};
 
 mod auth;
@@ -67,6 +67,7 @@ async fn main() -> Result<(), Error> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(site::save)
             .service(rbac::save)
+            .service(rbac::update)
             .service(root::get_site)
             .service(query::scoped_query)
     })
@@ -75,3 +76,6 @@ async fn main() -> Result<(), Error> {
     .run()
     .await
 }
+
+
+

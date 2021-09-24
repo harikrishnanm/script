@@ -3,13 +3,15 @@ use std::io::Write;
 use actix_multipart::Multipart;
 use actix_web::{post, web, App, Error, HttpResponse};
 use futures::{StreamExt, TryStreamExt};
+use log::*;
 
 #[post("/file")]
 async fn upload(mut payload: Multipart) -> Result<HttpResponse, Error> {
-  // iterate over multipart stream
   while let Ok(Some(mut field)) = payload.try_next().await {
+    debug!("Field {:?}", field);
     let content_type = field.content_disposition().unwrap();
     let filename = content_type.get_filename().unwrap();
+
     let filepath = format!("./tmp/{}", sanitize_filename::sanitize(&filename));
 
     // File::create is blocking operation, use threadpool

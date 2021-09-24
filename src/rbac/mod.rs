@@ -18,6 +18,7 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::constants;
+use crate::error::ScriptError;
 use crate::AppData;
 use models::*;
 
@@ -107,12 +108,12 @@ pub async fn update(
   }
 }
 
-#[post("/admin/rbac")]
+#[post("/rbac")]
 pub async fn save(
   data: Data<AppData>,
   rbac_policy: Json<NewRbacPolicy>,
   identity: web::ReqData<Identity>,
-) -> HttpResponse {
+) -> Result<HttpResponse, ScriptError> {
   info!("Creating new RBAC policy");
   match rbac_policy
     .save(&data.db_pool, &identity.into_inner())
@@ -122,11 +123,16 @@ pub async fn save(
       info!("Saved data");
       //Refresh the cache
       reload_rbac(&data).await;
-      HttpResponse::Created().json(rbac_policy)
+      Ok(HttpResponse::Created().json(rbac_policy))
     }
     Err(e) => {
       error!("Error creating rbac policy {}", e);
-      HttpResponse::Conflict().finish()
+      match e {
+        Error::Database(fields) => Err(ScriptError::RbacCreationConflict(
+          "Check params".to_string(),
+        )),
+        _ => Err(ScriptError::UnexpectedRbacCreationFailure),
+      }
     }
   }
 }

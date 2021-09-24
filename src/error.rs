@@ -3,10 +3,12 @@ use derive_more::{Display, Error};
 use log::error;
 use serde_derive::Serialize;
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Display)]
 pub enum ScriptError {
-    #[display(fmt = "Error creating rbac policy")]
-    RbacCreationError,
+    #[display(fmt = "Duplicate policy. Creation failed {}", _0)]
+    RbacCreationConflict(String),
+    #[display(fmt = "Creation failed due to an unexpected error")]
+    UnexpectedRbacCreationFailure,
 }
 
 #[derive(Serialize)]
@@ -14,13 +16,14 @@ pub struct ErrorResponse {
     pub error_message: String,
 }
 
-impl Clone for ScriptError {
+/*impl Clone for ScriptError {
     fn clone(&self) -> Self {
         match self {
-            ScriptError::RbacCreationError => ScriptError::RbacCreationError,
+            ScriptError::RbacCreationConflict => ScriptError::RbacCreationConflict,
+            ScriptError::UnexpectedRbacCreationFailure => ScriptError::RbacCreationConflic,
         }
     }
-}
+}*/
 
 impl ResponseError for ScriptError {
     fn error_response(&self) -> HttpResponse {
@@ -31,8 +34,9 @@ impl ResponseError for ScriptError {
     }
 
     fn status_code(&self) -> StatusCode {
-        match *self {
-            ScriptError::RbacCreationError => StatusCode::INTERNAL_SERVER_ERROR,
+        match self {
+            ScriptError::RbacCreationConflict(_) => StatusCode::BAD_REQUEST,
+            ScriptError::UnexpectedRbacCreationFailure => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

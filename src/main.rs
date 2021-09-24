@@ -1,6 +1,6 @@
 use actix_web::{
     middleware::{Compress, Condition, Logger},
-    web, App, HttpServer,
+    web, App, HttpResponse, HttpServer,
 };
 use dotenv::dotenv;
 use env_logger::Env;
@@ -13,6 +13,7 @@ mod config;
 mod constants;
 mod db;
 mod error;
+mod file;
 mod rbac;
 mod site;
 
@@ -62,11 +63,23 @@ async fn main() -> Result<(), Error> {
             .wrap(Compress::default())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
-            .service(site::save)
-            .service(rbac::save)
+            .service(
+                web::scope("/admin")
+                    .app_data(web::JsonConfig::default().error_handler(|err, _req| {
+                        actix_web::error::InternalError::from_response(
+                            "",
+                            HttpResponse::BadRequest()
+                                .content_type("application/json")
+                                .body(format!(r#"{{"error":"{}"}}"#, err)),
+                        )
+                        .into()
+                    }))
+                    .service(rbac::save),
+            )
             .service(rbac::update)
             .service(rbac::delete)
             .service(rbac::get_all)
+            .service(file::upload)
     })
     .workers(workers)
     .bind(addr)?

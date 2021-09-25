@@ -1,0 +1,119 @@
+{
+	"info": {
+		"_postman_id": "fdb1b3df-4518-4d5b-a750-1a801744d192",
+		"name": "Script",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create RBAC",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MzE3MTc3NDksImV4cCI6MTY2MzI1Mzc0OSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInVzZXIiOiJjbXNhZG1pbiIsInJvbGVzIjpbIkNNUyBBRE1JTiIsIkFETUlOIl19.jvdHuFS4OXIFFRqllVF7nUTGBeGQFXY6kp2sVQUe284",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"type": "text",
+						"value": "Bearer ",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"path\":\"/admin/site\",\n    \"path_match\": \"EXACT\",\n    \"method\": \"POST\",\n    \"rbac_role\": \"SITE ADMIN\",\n    \"rbac_user\": \"*\",\n    \"description\":\"\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{hostUrl}}/admin/rbac",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"admin",
+						"rbac"
+					]
+				},
+				"description": "Create RBAC policy."
+			},
+			"response": []
+		},
+		{
+			"name": "GET Site Details",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MzE3MTc3NDksImV4cCI6MTY2MzI1Mzc0OSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInVzZXIiOiJjbXNhZG1pbiIsInJvbGVzIjpbIkNNUyBBRE1JTiIsIkFETUlOIl19.jvdHuFS4OXIFFRqllVF7nUTGBeGQFXY6kp2sVQUe284",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hostUrl}}/corporate3",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"corporate3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Site",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJ3d3cubWVyYWRtYXJ0LmNvbSIsImlhdCI6MTYzMTc2OTQ1MywiZXhwIjoxNjYzMzA1NDUzLCJhdWQiOiJtZXJhZG1hcnQuY29tIiwic3ViIjoidXNlckBtZXJhZG1hcnQuY29tIiwicm9sZXMiOlsiU0lURSBPV05FUiIsIlNPTUUiXSwidXNlciI6ImNvcnBzaXRlb3duZXIifQ.U0xx5jFBq5PRzOsBy7RCN9iXTRdslMb-AzNG26erRJo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"corporate4\",\n    \"url\":\"www.mysite.com\",\n    \"cors_enabled\": false,\n    \"authorities\": []\n}\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{hostUrl}}/admin/site",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"admin",
+						"site"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

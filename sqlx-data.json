@@ -1,12 +1,12 @@
 {
   "db": "PostgreSQL",
-  "3ffaf9a3feed97b049035b4a8f03e3d4ba601532bed00f3bc9f684f2e0720898": {
-    "query": "INSERT INTO site (id, name, url, cors_enabled, created_by)\n        VALUES ($1, $2, $3, $4, $5)\n          RETURNING id, name, url, cors_enabled, created_by, created, modified",
+  "1b52d168f3bc2e0b8efeeac4ddcc9f5c1342278d2629351507b4afc78f0cf1f5": {
+    "query": "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)\n          VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id",
+          "name": "site_id",
           "type_info": "Uuid"
         },
         {
@@ -16,26 +16,36 @@
         },
         {
           "ordinal": 2,
-          "name": "url",
+          "name": "path",
           "type_info": "Varchar"
         },
         {
           "ordinal": 3,
-          "name": "cors_enabled",
-          "type_info": "Bool"
+          "name": "slug",
+          "type_info": "Varchar"
         },
         {
           "ordinal": 4,
-          "name": "created_by",
+          "name": "url",
           "type_info": "Varchar"
         },
         {
           "ordinal": 5,
+          "name": "cors_enabled",
+          "type_info": "Bool"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
           "name": "created",
           "type_info": "Timestamp"
         },
         {
-          "ordinal": 6,
+          "ordinal": 8,
           "name": "modified",
           "type_info": "Timestamp"
         }
@@ -45,6 +55,8 @@
           "Uuid",
           "Varchar",
           "Varchar",
+          "Varchar",
+          "Varchar",
           "Bool",
           "Varchar"
         ]
@@ -52,6 +64,8 @@
       "nullable": [
         false,
         false,
+        false,
+        true,
         true,
         true,
         false,
@@ -78,6 +92,157 @@
       "nullable": []
     }
   },
+  "923bcc704dfc433e1b3d2127135df9153f87cbb22bb09238bac58c7a2ad2f08e": {
+    "query": "UPDATE rbac SET path = $1, path_match = $2, method = $3, rbac_role = $4, rbac_user = $5, description = $6, modified_by = $8, modified = $7\n        WHERE rbac_id = $9 RETURNING rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified_by, modified",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "rbac_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "path_match",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "method",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "rbac_role",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "rbac_user",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "description",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Timestamp",
+          "Varchar",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ]
+    }
+  },
+  "a1a1691f3ba09052a365b9a396bae070682189a242440b22c9c210d5b28baba7": {
+    "query": "INSERT INTO rbac(rbac_id, path, path_match, method, rbac_role, rbac_user, description, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n          RETURNING rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified_by, modified",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "rbac_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "path_match",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "method",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "rbac_role",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "rbac_user",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "description",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        false
+      ]
+    }
+  },
   "a21ca8d6909da50d4cc033ca76ff63db8509d1e2a1ead0f6d8d206356b6721d2": {
     "query": "SELECT rbac_id, path, path_match, method, rbac_role, rbac_user FROM rbac",
     "describe": {
@@ -85,7 +250,7 @@
         {
           "ordinal": 0,
           "name": "rbac_id",
-          "type_info": "Int4"
+          "type_info": "Uuid"
         },
         {
           "ordinal": 1,
@@ -123,6 +288,72 @@
         false,
         false,
         false
+      ]
+    }
+  },
+  "f09f44108e2510c2f43ee09ca0a8862e1d3dab1243b4a506e0e772f7aaa89efb": {
+    "query": "SELECT rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified, modified_by FROM rbac",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "rbac_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "path_match",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "method",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "rbac_role",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "rbac_user",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "description",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "modified",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": []
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        false,
+        true
       ]
     }
   }

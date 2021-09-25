@@ -3,36 +3,40 @@ use derive_more::{Display, Error};
 use log::error;
 use serde_derive::Serialize;
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Display)]
 pub enum ScriptError {
-  #[display(fmt = "Error creating rbac policy")]
-  RbacCreationError,
+    #[display(fmt = "Duplicate policy. Creation failed {}", _0)]
+    RbacCreationConflict(String),
+    #[display(fmt = "Creation failed due to an unexpected error")]
+    UnexpectedRbacCreationFailure,
 }
 
 #[derive(Serialize)]
 pub struct ErrorResponse {
-  error_message: String,
+    pub error_message: String,
 }
 
-impl Clone for ScriptError {
-  fn clone(&self) -> Self {
-    match self {
-      ScriptError::RbacCreationError => ScriptError::RbacCreationError,
+/*impl Clone for ScriptError {
+    fn clone(&self) -> Self {
+        match self {
+            ScriptError::RbacCreationConflict => ScriptError::RbacCreationConflict,
+            ScriptError::UnexpectedRbacCreationFailure => ScriptError::RbacCreationConflic,
+        }
     }
-  }
-}
+}*/
 
 impl ResponseError for ScriptError {
-  fn error_response(&self) -> HttpResponse {
-    error!("Error {}", self.to_string());
-    HttpResponseBuilder::new(self.status_code()).json(ErrorResponse {
-      error_message: self.to_string(),
-    })
-  }
-
-  fn status_code(&self) -> StatusCode {
-    match *self {
-      ScriptError::RbacCreationError => StatusCode::INTERNAL_SERVER_ERROR,
+    fn error_response(&self) -> HttpResponse {
+        error!("Error {}", self.to_string());
+        HttpResponseBuilder::new(self.status_code()).json(ErrorResponse {
+            error_message: self.to_string(),
+        })
     }
-  }
+
+    fn status_code(&self) -> StatusCode {
+        match self {
+            ScriptError::RbacCreationConflict(_) => StatusCode::BAD_REQUEST,
+            ScriptError::UnexpectedRbacCreationFailure => StatusCode::INTERNAL_SERVER_ERROR,
+        }
+    }
 }

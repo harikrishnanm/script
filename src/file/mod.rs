@@ -22,35 +22,35 @@ use crate::constants::*;
 
 #[get("/site/{site_name}/file/{file_name:.*}")]
 async fn get_file(
-  data: web::Data<AppData>,
-  Path((site_name, file_name)): Path<(String, String)>,
+    data: web::Data<AppData>,
+    Path((site_name, file_name)): Path<(String, String)>,
 ) -> Result<NamedFile, ScriptError> {
-  debug!("Request file {}", file_name);
-  let full_file_name = format!("./tmp/{}", file_name);
-  match NamedFile::open(full_file_name) {
-    Ok(file) => {
-      if file.metadata().unwrap().is_dir() {
-        return Err(ScriptError::BadRequest(
-          "Requested resource is not a file".to_string(),
-        ));
-      }
-      debug!("File found {:?}", file);
-      Ok(file.use_last_modified(true).use_etag(true))
+    debug!("Request file {}", file_name);
+    let full_file_name = format!("./tmp/{}", file_name);
+    match NamedFile::open(full_file_name) {
+        Ok(file) => {
+            if file.metadata().unwrap().is_dir() {
+                return Err(ScriptError::BadRequest(
+                    "Requested resource is not a file".to_string(),
+                ));
+            }
+            debug!("File found {:?}", file);
+            Ok(file.use_last_modified(true).use_etag(true))
+        }
+        Err(e) => {
+            error!("Error getting file {}", e);
+            Err(ScriptError::FileNotFound)
+        }
     }
-    Err(e) => {
-      error!("Error getting file {}", e);
-      Err(ScriptError::FileNotFound)
-    }
-  }
 
-  //TODO Content dispositon
+    //TODO Content dispositon
 }
 #[get("/site/{site_name}/folder/{folder:.*}")]
 async fn list(
-  data: web::Data<AppData>,
-  Path((site_name, folder)): Path<(String, String)>,
+    data: web::Data<AppData>,
+    Path((site_name, folder)): Path<(String, String)>,
 ) -> Result<HttpResponse, Error> {
-  match sqlx::query_as!(
+    match sqlx::query_as!(
     File,
     "SELECT file_id, name, original_name, cache_control, tags, folder, mime_type, site_name, created_by 
       FROM file WHERE site_name = $1 and folder = $2",
@@ -70,77 +70,77 @@ async fn list(
 
 #[post("/site/{site_name}/file/{folder:.*}")]
 async fn upload(
-  mut payload: Multipart,
-  identity: web::ReqData<Identity>,
-  data: web::Data<AppData>,
-  Path((site_name, folder)): Path<(String, String)>,
+    mut payload: Multipart,
+    identity: web::ReqData<Identity>,
+    data: web::Data<AppData>,
+    Path((site_name, folder)): Path<(String, String)>,
 ) -> Result<HttpResponse, Error> {
-  let mut files: Vec<File> = Vec::new();
+    let mut files: Vec<File> = Vec::new();
 
-  let folder_name = format!("./tmp/{}", folder);
-  debug!("Create folder {}", &folder_name);
-  DirBuilder::new()
-    .recursive(true)
-    .create(&folder_name)
-    .unwrap();
+    let folder_name = format!("./tmp/{}", folder);
+    debug!("Create folder {}", &folder_name);
+    DirBuilder::new()
+        .recursive(true)
+        .create(&folder_name)
+        .unwrap();
 
-  while let Ok(Some(mut field)) = payload.try_next().await {
-    let mut tx = match data.db_pool.begin().await {
-      Ok(mut t) => t,
-      Err(e) => {
-        error!("Could not start transaction {}", e);
-        return Ok(HttpResponse::InternalServerError().body(e.to_string()));
-      }
-    };
-    debug!("File upload {:?}", field);
-    let content_type = field.content_disposition().unwrap();
-    let filename = content_type.get_filename().unwrap();
-    let sanitized_filename = sanitize_filename::sanitize(&filename);
-    let filepath = format!("{}/{}", folder_name, sanitized_filename);
+    while let Ok(Some(mut field)) = payload.try_next().await {
+        let mut tx = match data.db_pool.begin().await {
+            Ok(t) => t,
+            Err(e) => {
+                error!("Could not start transaction {}", e);
+                return Ok(HttpResponse::InternalServerError().body(e.to_string()));
+            }
+        };
+        debug!("File upload {:?}", field);
+        let content_type = field.content_disposition().unwrap();
+        let filename = content_type.get_filename().unwrap();
+        let sanitized_filename = sanitize_filename::sanitize(&filename);
+        //let filepath = format!("{}/{}", folder_name, sanitized_filename);
 
-    let mime_type = match field.headers().get("content-type") {
-      Some(mime_type) => mime_type.to_str().unwrap(),
-      None => "application/octet-stream",
-    };
-    debug!("Mime type {}", mime_type);
+        let mime_type = match field.headers().get("content-type") {
+            Some(mime_type) => mime_type.to_str().unwrap(),
+            None => "application/octet-stream",
+        };
+        debug!("Mime type {}", mime_type);
 
-    let tags = vec![sanitized_filename.clone(), site_name.clone()];
+        let tags = vec![sanitized_filename.clone(), site_name.clone()];
 
-    let new_file = File {
-      file_id: Uuid::new_v4(),
-      name: sanitized_filename.to_string(),
-      original_name: filename.to_string(),
-      cache_control: CACHE_CONTROL_DEFAULT.to_string(),
-      folder: folder.clone(),
-      tags: tags,
-      mime_type: mime_type.to_string(),
-      site_name: site_name.clone(),
-      created_by: identity.clone().into_inner().user,
-    };
+        let new_file = File {
+            file_id: Uuid::new_v4(),
+            name: sanitized_filename.to_string(),
+            original_name: filename.to_string(),
+            cache_control: CACHE_CONTROL_DEFAULT.to_string(),
+            folder: folder.clone(),
+            tags: tags,
+            mime_type: mime_type.to_string(),
+            site_name: site_name.clone(),
+            created_by: identity.clone().into_inner().user,
+        };
 
-    match new_file.save(identity.clone().into_inner(), &mut tx).await {
-      Ok(saved_file) => {
-        // File::create is blocking operation, use threadpool
-        let full_path = format!("{}/{}", &folder_name, sanitized_filename);
-        let mut f = web::block(|| std::fs::File::create(full_path))
-          .await
-          .unwrap();
+        match new_file.save(identity.clone().into_inner(), &mut tx).await {
+            Ok(saved_file) => {
+                // File::create is blocking operation, use threadpool
+                let full_path = format!("{}/{}", &folder_name, sanitized_filename);
+                let mut f = web::block(|| std::fs::File::create(full_path))
+                    .await
+                    .unwrap();
 
-        // Field in turn is stream of *Bytes* object
-        while let Some(chunk) = field.next().await {
-          let data = chunk.unwrap();
-          // filesystem operations are blocking, we have to use threadpool
-          f = web::block(move || f.write_all(&data).map(|_| f)).await?;
-        }
-        debug!("Pushing file struct {:?}", saved_file);
-        files.push(saved_file.to_owned());
-      }
-      Err(e) => {
-        error!("Error saving file {:?}  Error: {}", new_file, e);
-        //tx.rollback().await;
-      }
-    };
-    tx.commit().await;
-  }
-  Ok(HttpResponse::Ok().json(files))
+                // Field in turn is stream of *Bytes* object
+                while let Some(chunk) = field.next().await {
+                    let data = chunk.unwrap();
+                    // filesystem operations are blocking, we have to use threadpool
+                    f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+                }
+                debug!("Pushing file struct {:?}", saved_file);
+                files.push(saved_file.to_owned());
+            }
+            Err(e) => {
+                error!("Error saving file {:?}  Error: {}", new_file, e);
+                //tx.rollback().await;
+            }
+        };
+        let _ = tx.commit().await;
+    }
+    Ok(HttpResponse::Ok().json(files))
 }

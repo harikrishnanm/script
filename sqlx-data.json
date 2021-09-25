@@ -1,90 +1,5 @@
 {
   "db": "PostgreSQL",
-  "0d6bd81d51c20c29f20a98f36a4262ed854e16b25885e4087b04b9f3a2d4fdf3": {
-    "query": "INSERT INTO text (text_id, name, mime_type, site_id, site_name, collection_id, collection_name, tags, content, content_length, cache_control, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) \n        RETURNING text_id, name, mime_type, site_id, collection_id, content_length, tags, created_by, modified, version",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "text_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "site_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "collection_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "content_length",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 6,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "created_by",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 8,
-          "name": "modified",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 9,
-          "name": "version",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "VarcharArray",
-          "Text",
-          "Int4",
-          "Varchar",
-          "Varchar"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "1b52d168f3bc2e0b8efeeac4ddcc9f5c1342278d2629351507b4afc78f0cf1f5": {
     "query": "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)\n          VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
     "describe": {
@@ -537,6 +452,91 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "cd301f814e257a38a3c6fac77431fcf00e4a662ee7d26b451248b3d2580b2902": {
+    "query": "INSERT INTO text (text_id, name, mime_type, site_id, site_name, \n          collection_id, collection_name, tags, content, \n            content_length, cache_control, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) \n          RETURNING text_id, name, mime_type, site_id, \n            collection_id, content_length, tags, created_by, modified, version",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "text_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "collection_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "content_length",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 6,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "created_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 8,
+          "name": "modified",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 9,
+          "name": "version",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "VarcharArray",
+          "Text",
+          "Int4",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         false
       ]
     }

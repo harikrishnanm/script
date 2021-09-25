@@ -15,34 +15,39 @@ use crate::error::ErrorResponse;
 
 #[post("/admin/site")]
 pub async fn save(
-  identity: web::ReqData<Identity>,
-  data: web::Data<AppData>,
-  new_site: web::Json<NewSite>,
+    identity: web::ReqData<Identity>,
+    data: web::Data<AppData>,
+    new_site: web::Json<NewSite>,
 ) -> HttpResponse {
-  info!("Got reqest for creating site {:?}", new_site.name);
-  trace!("Create site request json {:?}", new_site);
-  trace!("Identity {:?}", identity);
+    info!("Got reqest for creating site {:?}", new_site.name);
+    trace!("Create site request json {:?}", new_site);
+    trace!("Identity {:?}", identity);
 
-  match new_site.save(identity.into_inner(), &data.db_pool).await {
-    Ok(r) => {
-      rbac::reload_rbac(&data).await;
-      HttpResponse::Created().json(r)
-    }
-    Err(e) => {
-      error!("{}", e);
-      let err_response = ErrorResponse {
-        error_message: e.to_string(),
-      };
-      match &e {
-        Error::Database(database_err) => {
-          error!("{}", database_err);
-          HttpResponse::BadRequest().json(err_response)
+    match new_site.save(identity.into_inner(), &data.db_pool).await {
+        Ok(r) => {
+            match rbac::reload_rbac(&data).await {
+                Ok(_) => debug!("RBAC reloaded"),
+                Err(e) => {
+                    error!("Error reloading rbac {}", e);
+                }
+            }
+            HttpResponse::Created().json(r)
         }
-        _ => {
-          error!("An unknown error has occured {}", e);
-          HttpResponse::InternalServerError().json(err_response)
+        Err(e) => {
+            error!("{}", e);
+            let err_response = ErrorResponse {
+                error_message: e.to_string(),
+            };
+            match &e {
+                Error::Database(database_err) => {
+                    error!("{}", database_err);
+                    HttpResponse::BadRequest().json(err_response)
+                }
+                _ => {
+                    error!("An unknown error has occured {}", e);
+                    HttpResponse::InternalServerError().json(err_response)
+                }
+            }
         }
-      }
     }
-  }
 }

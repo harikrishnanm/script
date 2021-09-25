@@ -1,12 +1,8 @@
 pub mod models;
 pub mod text;
 
-use actix_web::{
-  get, http, post, web,
-  web::{Data, Path},
-  HttpResponse,
-};
-use etag::EntityTag;
+use actix_web::{get, http, post, web, web::Path, HttpResponse};
+
 use log::*;
 
 use crate::error::ScriptError;
@@ -37,7 +33,6 @@ async fn get_text(
         Some(header) => header,
         None => "application/octet-stream".to_string(),
       };
-      let etag = EntityTag::strong(content_str);
       let mut builder = HttpResponse::Ok();
 
       Ok(
@@ -74,6 +69,9 @@ async fn save(
     .await
   {
     Ok(text) => Ok(HttpResponse::Created().json(text)),
-    Err(e) => Err(ScriptError::TextCreationFailure),
+    Err(e) => {
+      error!("Error saving content text {}", e);
+      Err(ScriptError::TextCreationFailure)
+    }
   }
 }

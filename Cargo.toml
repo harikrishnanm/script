@@ -35,3 +35,4 @@ sanitize-filename = "0.3.0"
 fasthash ="0.4.0"
 validator = {version = "0.12.0", features =  ["derive"]}
 validator_derive = "0.12.0"
+etag = "3.0.0"

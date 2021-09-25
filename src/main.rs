@@ -1,5 +1,5 @@
 use actix_web::{
-    middleware::{Compress, Condition, Logger},
+    middleware::{Compress, Condition, DefaultHeaders, Logger},
     web, App, HttpResponse, HttpServer,
 };
 use dotenv::dotenv;
@@ -17,6 +17,7 @@ mod error;
 mod file;
 mod rbac;
 mod site;
+mod text;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
 
@@ -73,6 +74,8 @@ async fn main() -> Result<(), Error> {
             .service(file::list)
             .service(file::get_file)
             .service(collection::save)
+            .service(text::save)
+            .service(text::get_text)
     })
     .workers(workers)
     .bind(addr)?

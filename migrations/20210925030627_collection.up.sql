@@ -3,7 +3,9 @@ CREATE TABLE collection (
   collection_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
   name VARCHAR(50) NOT NULL,
   parent_id UUID,
-  site_id Uuid NOT NULL,
+  cache_control VARCHAR(200) NOT NULL DEFAULT 'max-age=0, no-store, must-revalidate',
+  tags VARCHAR(50) [],
+  site_id UUID NOT NULL,
   site_name VARCHAR(50) NOT NULL,
   created_by VARCHAR(50) NOT NULL,
   created TIMESTAMP NOT NULL DEFAULT current_timestamp,
@@ -14,3 +16,4 @@ CREATE TABLE collection (
 );
 
 CREATE UNIQUE INDEX site_collection_uniq_idx ON collection(name, site_id);
+CREATE INDEX site_name_idx on collection(site_name);

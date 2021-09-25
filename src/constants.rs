@@ -13,3 +13,5 @@ pub const EXACT: &str = "EXACT";
 pub const STARTSWITH: &str = "STARTSWITH";
 
 pub const WILDCARD: &str = "*";
+
+pub const CACHE_CONTROL_DEFAULT: &str = "max-age=0, no-store, must-revalidate";

@@ -18,6 +18,8 @@ use std::fs::DirBuilder;
 
 use uuid::Uuid;
 
+use crate::constants::*;
+
 #[get("/site/{site_name}/file/{file_name:.*}")]
 async fn get_file(
   data: web::Data<AppData>,
@@ -50,7 +52,7 @@ async fn list(
 ) -> Result<HttpResponse, Error> {
   match sqlx::query_as!(
     File,
-    "SELECT file_id, name, original_name, folder, mime_type, site_name, created_by 
+    "SELECT file_id, name, original_name, cache_control, tags, folder, mime_type, site_name, created_by 
       FROM file WHERE site_name = $1 and folder = $2",
     site_name,
     folder
@@ -102,11 +104,15 @@ async fn upload(
     };
     debug!("Mime type {}", mime_type);
 
+    let tags = vec![sanitized_filename.clone(), site_name.clone()];
+
     let new_file = File {
       file_id: Uuid::new_v4(),
       name: sanitized_filename.to_string(),
       original_name: filename.to_string(),
+      cache_control: CACHE_CONTROL_DEFAULT.to_string(),
       folder: folder.clone(),
+      tags: tags,
       mime_type: mime_type.to_string(),
       site_name: site_name.clone(),
       created_by: identity.clone().into_inner().user,

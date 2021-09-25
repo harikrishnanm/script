@@ -4,6 +4,8 @@ CREATE TABLE file (
   file_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
   name VARCHAR(255) NOT NULL,
   original_name VARCHAR(255) NOT NULL,
+  cache_control VARCHAR(200) NOT NULL DEFAULT 'max-age=0, no-store, must-revalidate',
+  tags VARCHAR(50) [] NOT NULL,
   mime_type VARCHAR(50) NOT NULL,
   folder VARCHAR(25) NOT NULL DEFAULT 'root',
   site_name VARCHAR(50) NOT NULL,

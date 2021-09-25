@@ -70,6 +70,8 @@ async fn main() -> Result<(), Error> {
             .service(rbac::get_all)
             .service(site::save)
             .service(file::upload)
+            .service(file::list)
+            .service(file::get_file)
             .service(collection::save)
     })
     .workers(workers)

@@ -9,6 +9,10 @@ pub enum ScriptError {
     RbacCreationConflict(String),
     #[display(fmt = "Creation failed due to an unexpected error")]
     UnexpectedRbacCreationFailure,
+    #[display(fmt = "Requested File not found")]
+    FileNotFound,
+    #[display(fmt = "This request cannot be processed. {}", _0)]
+    BadRequest(String),
 }
 
 #[derive(Serialize)]
@@ -37,6 +41,8 @@ impl ResponseError for ScriptError {
         match self {
             ScriptError::RbacCreationConflict(_) => StatusCode::BAD_REQUEST,
             ScriptError::UnexpectedRbacCreationFailure => StatusCode::INTERNAL_SERVER_ERROR,
+            ScriptError::FileNotFound => StatusCode::NOT_FOUND,
+            ScriptError::BadRequest(_) => StatusCode::BAD_REQUEST,
         }
     }
 }

@@ -74,6 +74,68 @@
       ]
     }
   },
+  "2a024d788b9db9b7bf14c4660acf39c90fdc60c95ff659f0ab61ef6574b0c780": {
+    "query": "INSERT INTO file (file_id, name, original_name, folder, mime_type, site_name, created_by) \n      VALUES ($1, $2, $3, $4, $5, $6, $7) \n        RETURNING file_id, name, original_name, folder, mime_type, site_name, created_by",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "file_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "original_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "folder",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "site_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "393a5bcaac1129706976ed5348f84a5e86eae03cf86143d3ba8fe324b65886ec": {
     "query": "INSERT INTO collection (collection_id, name, parent_id, site_id, site_name, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6)\n          RETURNING collection_id, name, parent_id, site_id, site_name, created_by",
     "describe": {
@@ -145,6 +207,63 @@
         ]
       },
       "nullable": []
+    }
+  },
+  "53b8c1b29976b22a3e59ec8f0163844fcfe328a4e946b181e38596ff37a30e5c": {
+    "query": "SELECT file_id, name, original_name, folder, mime_type, site_name, created_by \n      FROM file WHERE site_name = $1 and folder = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "file_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "original_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "folder",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "site_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
     }
   },
   "923bcc704dfc433e1b3d2127135df9153f87cbb22bb09238bac58c7a2ad2f08e": {

@@ -9,6 +9,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use std::{io::Error, result::Result};
 
+mod collection;
 mod config;
 mod constants;
 mod db;
@@ -63,23 +64,13 @@ async fn main() -> Result<(), Error> {
             .wrap(Compress::default())
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
-            .service(
-                web::scope("/admin")
-                    .app_data(web::JsonConfig::default().error_handler(|err, _req| {
-                        actix_web::error::InternalError::from_response(
-                            "",
-                            HttpResponse::BadRequest()
-                                .content_type("application/json")
-                                .body(format!(r#"{{"error":"{}"}}"#, err)),
-                        )
-                        .into()
-                    }))
-                    .service(rbac::save),
-            )
+            .service(rbac::save)
             .service(rbac::update)
             .service(rbac::delete)
             .service(rbac::get_all)
+            .service(site::save)
             .service(file::upload)
+            .service(collection::save)
     })
     .workers(workers)
     .bind(addr)?

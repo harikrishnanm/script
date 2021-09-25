@@ -60,7 +60,7 @@ impl NewSite {
     // Create new RBAC Policy
     let default_rbac_policy = NewRbacPolicy {
       path: site_path,
-      path_match: constants::EXACT.to_string(),
+      path_match: constants::STARTSWITH.to_string(),
       method: constants::WILDCARD.to_string(),
       rbac_user: user.to_string(),
       rbac_role: constants::WILDCARD.to_string(),

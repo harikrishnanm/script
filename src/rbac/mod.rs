@@ -108,7 +108,7 @@ pub async fn update(
   }
 }
 
-#[post("/rbac")]
+#[post("/admin/rbac")]
 pub async fn save(
   data: Data<AppData>,
   rbac_policy: Json<NewRbacPolicy>,

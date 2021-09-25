@@ -74,6 +74,61 @@
       ]
     }
   },
+  "393a5bcaac1129706976ed5348f84a5e86eae03cf86143d3ba8fe324b65886ec": {
+    "query": "INSERT INTO collection (collection_id, name, parent_id, site_id, site_name, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6)\n          RETURNING collection_id, name, parent_id, site_id, site_name, created_by",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "collection_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "site_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "created_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "49a7f8488767ffef12c3ae7ea276314e3666809030e66a8f64977e271f78cedb": {
     "query": "INSERT INTO rbac(path, path_match, method, rbac_role, rbac_user, description, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)",
     "describe": {
@@ -287,6 +342,26 @@
         false,
         false,
         false,
+        false
+      ]
+    }
+  },
+  "e873da84be2cfffedf4ddb53d79af3746a29bb8ed93a46f07506020ac3d38a9a": {
+    "query": "SELECT site_id FROM site WHERE name = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "site_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
         false
       ]
     }

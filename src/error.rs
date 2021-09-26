@@ -1,5 +1,5 @@
 use actix_web::{dev::HttpResponseBuilder, error::ResponseError, http::StatusCode, HttpResponse};
-use derive_more::{Display, Error};
+use derive_more::Display;
 use log::error;
 use serde_derive::Serialize;
 

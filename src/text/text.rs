@@ -87,7 +87,7 @@ impl NewText {
 impl UpdateText {
     pub async fn update(
         self: &Self,
-        identity: &Identity,
+        _identity: &Identity,
         db_pool: &DBPool,
         site_name: &str,
         coll_name: &str,
@@ -121,16 +121,16 @@ impl UpdateText {
           Ok(_) => debug!("Inserted into archive"),
           Err(e) => {
               error!("Error archiving {}", e);
-              tx.rollback().await;
+              let _ = tx.rollback().await;
               return Err(e);
             }
         };
         debug!("Archival complete");
 
-        let (mut mime_type, mut content, mut cache_control, mut tags) =
-            ("".to_string(), "".to_string(), "".to_string(), Vec::new());
+        //let (mut mime_type, mut content, mut cache_control, mut tags) =
+        //    (String::new(), String::new(), String::new(), Vec::new());
 
-        let old_version =
+        let (old_version, mut mime_type, mut content, mut cache_control, mut tags) =
             match sqlx::query!(
             "SELECT  mime_type, tags, content, cache_control, version FROM text WHERE site_name = $1 AND collection_name = $2 AND name = $3",
             site_name, coll_name, text_name
@@ -139,14 +139,19 @@ impl UpdateText {
             .await
             {
                 Ok(result) => {
-                    mime_type = match result.mime_type {
+
+                    (result.version,
+                        match result.mime_type {
                         Some(val) => val,
                         None => "".to_string()
-                    };
-                    tags = result.tags;
-                    cache_control= result.cache_control;
-                    content = result.content;
-                    result.version
+                    },
+                    result.content, 
+                    result.cache_control,
+                    result.tags)
+                    //tags = result.tags;
+                    //cache_control= result.cache_control;
+                    //content = result.content;
+                    
                 }
                 Err(e) => {
                     error!("Error getting old version {}", e);
@@ -212,9 +217,16 @@ impl UpdateText {
         {
             Ok(new_text) => {
                 debug!("Can update as expected..commiting now");
-                tx.commit().await;
-                debug!("Update complete");
-                Ok(new_text)
+                match tx.commit().await {
+                    Ok(_) => {
+                        debug!("Update complete");
+                        Ok(new_text)
+                    }
+                    Err(e) => {
+                        error!("Error commiting content {}", e);
+                        Err(e)
+                    }
+                }
             }
             Err(e) => {
                 error!("Error updating text {}", e);

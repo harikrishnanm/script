@@ -11,8 +11,8 @@ local function randomString(length)
 end
 
 wrk.method = "GET"
-wrk.body   = '{"raw_data":" .. randomString(15) .. ","alg":"AES_GCM"}'
-wrk.headers["Content-Type"] = "application/json"
+-- wrk.body   = '{"raw_data":" .. randomString(15) .. ","alg":"AES_GCM"}'
+--wrk.headers["Content-Type"] = "application/json"
 wrk.headers["Authorization"] = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE2MzE3MTc3NDksImV4cCI6MTY2MzI1Mzc0OSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInVzZXIiOiJjbXNhZG1pbiIsInJvbGVzIjpbIkNNUyBBRE1JTiIsIkFETUlOIl19.jvdHuFS4OXIFFRqllVF7nUTGBeGQFXY6kp2sVQUe284"
 
 response = function(status, headers, body)

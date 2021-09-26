@@ -29,7 +29,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"path\":\"/site/admin\",\n    \"path_match\": \"EXACT\",\n    \"method\": \"*\",\n    \"rbac_role\": \"SITE ADMIN\",\n    \"rbac_user\": \"*\",\n    \"description\":\"Grant all site permissnions to SITE ADMIN role\"\n}",
+					"raw": "{\n    \"path\":\"/admin/site\",\n    \"path_match\": \"EXACT\",\n    \"method\": \"*\",\n    \"rbac_role\": \"SITE ADMIN\",\n    \"rbac_user\": \"*\",\n    \"description\":\"Grant all site permissnions to SITE ADMIN role\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -203,6 +203,258 @@
 						"site",
 						"corporate",
 						"collection"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{siteAdminBearerToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "",
+							"type": "file",
+							"src": "/Users/hari/Desktop/resonate-nancy-duarte.pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{hostUrl}}/site/corporate/file/docs",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"site",
+						"corporate",
+						"file",
+						"docs"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get file",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{siteAdminBearerToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "{{hostUrl}}/site/corporate/file/docs/resonate-nancy-duarte.pdf",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"site",
+						"corporate",
+						"file",
+						"docs",
+						"resonate-nancy-duarte.pdf"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get File Listing",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{siteAdminBearerToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hostUrl}}/site/corporate/file/images/Ford%20RC.jpg",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"site",
+						"corporate",
+						"file",
+						"images",
+						"Ford%20RC.jpg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Text",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{siteAdminBearerToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"content2\",\n    \"mime_type\": \"application/javascript\",\n    \"content\":\"kasjd;lajksd;lkajs;dlkjas;ldkjas;ldkj;lakjs;ldkja;sLKDJ;ALSKJ;LKASJL;KASJ;LKFSAD;LFKJDS;LKFJS;DLFKJ\",\n    \"cache_control\": \"public, max-age: 86400\",\n    \"tags\":[]\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{hostUrl}}/site/corporate/collection/collection2/text",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"site",
+						"corporate",
+						"collection",
+						"collection2",
+						"text"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Content with Mime",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{siteAdminBearerToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hostUrl}}/site/corporate/collection/collection2/text/test_json1",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"site",
+						"corporate",
+						"collection",
+						"collection2",
+						"text",
+						"test_json1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Text",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{siteAdminBearerToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"mime_type\": \"text/html\",\n    \"cache_control\": \"public, max-age: 8765\",\n    \"tags\":[]\n\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{hostUrl}}/site/corporate/collection/collection2/text/test_json1",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"site",
+						"corporate",
+						"collection",
+						"collection2",
+						"text",
+						"test_json1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Collection",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{siteAdminBearerToken}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hostUrl}}/site/corporate/collection/collection2",
+					"host": [
+						"{{hostUrl}}"
+					],
+					"path": [
+						"site",
+						"corporate",
+						"collection",
+						"collection2"
 					]
 				}
 			},

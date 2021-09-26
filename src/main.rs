@@ -1,6 +1,6 @@
 use actix_web::{
-    middleware::{Compress, Condition, DefaultHeaders, Logger},
-    web, App, HttpResponse, HttpServer,
+    middleware::{Compress, Condition, Logger},
+    web, App, HttpServer,
 };
 use dotenv::dotenv;
 use env_logger::Env;

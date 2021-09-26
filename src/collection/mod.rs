@@ -32,7 +32,10 @@ pub async fn get(
     {
         Ok(result) => cache_control = result.cache_control,
         Err(e) => {
-            error!("Couldnt get cache control header..will not process further");
+            error!(
+                "Couldnt get cache control header..will not process further {}",
+                e
+            );
             return Err(ScriptError::FileNotFound);
         }
     };

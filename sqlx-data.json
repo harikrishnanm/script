@@ -1,5 +1,67 @@
 {
   "db": "PostgreSQL",
+  "1af17460060f334536edbe83b0426a6c98c426b7598802fff79c45d26775b474": {
+    "query": "INSERT INTO collection (collection_id, name, parent_id, cache_control, site_id, site_name, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)\n          RETURNING collection_id, name, parent_id, cache_control, site_id, site_name, created_by",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "collection_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "site_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "1b52d168f3bc2e0b8efeeac4ddcc9f5c1342278d2629351507b4afc78f0cf1f5": {
     "query": "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)\n          VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
     "describe": {
@@ -67,61 +129,6 @@
         false,
         true,
         true,
-        true,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "393a5bcaac1129706976ed5348f84a5e86eae03cf86143d3ba8fe324b65886ec": {
-    "query": "INSERT INTO collection (collection_id, name, parent_id, site_id, site_name, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6)\n          RETURNING collection_id, name, parent_id, site_id, site_name, created_by",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "collection_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "parent_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "site_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "site_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 5,
-          "name": "created_by",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Uuid",
-          "Varchar",
-          "Varchar"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
         true,
         false,
         false,
@@ -637,6 +644,117 @@
       ]
     }
   },
+  "c7c25bd25a0763bf3986f2dbcff32ccf8edc1d395ca1e149f5f13121994557a4": {
+    "query": "SELECT * FROM text WHERE site_name = $1 AND collection_name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 1,
+          "name": "text_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 6,
+          "name": "site_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "collection_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 8,
+          "name": "collection_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 9,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 10,
+          "name": "content_length",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 11,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 12,
+          "name": "version",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 13,
+          "name": "created_by",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 14,
+          "name": "created",
+          "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 15,
+          "name": "modified",
+          "type_info": "Timestamp"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "d984a17ba884dbd784296649249442b4db661f42c748a8316240d0968bf762a5": {
     "query": "SELECT content, mime_type, cache_control FROM text \n      WHERE site_name = $1 AND collection_name = $2 AND name = $3",
     "describe": {
@@ -876,6 +994,33 @@
         true,
         false,
         true
+      ]
+    }
+  },
+  "f2a515775c6a0e45fe8cae662a77eb0783624022ab8fa9e4b3f3e8cf86328bba": {
+    "query": "SELECT name, cache_control FROM collection WHERE site_name = $1 AND name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
       ]
     }
   }

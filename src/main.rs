@@ -74,6 +74,7 @@ async fn main() -> Result<(), Error> {
             .service(file::list)
             .service(file::get_file)
             .service(collection::save)
+            .service(collection::get)
             .service(text::save)
             .service(text::get_text)
             .service(text::update)

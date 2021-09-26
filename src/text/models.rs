@@ -12,6 +12,14 @@ pub struct NewText {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct UpdateText {
+    pub mime_type: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub content: Option<String>,
+    pub cache_control: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Text {
     pub text_id: Uuid,
     pub name: String,

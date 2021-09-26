@@ -1,7 +1,7 @@
 pub mod models;
 pub mod text;
 
-use actix_web::{get, http, post, web, web::Path, HttpResponse};
+use actix_web::{get, http, post, put, web, web::Path, HttpResponse};
 
 use log::*;
 
@@ -49,8 +49,6 @@ async fn get_text(
   }
 }
 
-//HttpResponse::Ok().finish()
-
 #[post("/site/{site}/collection/{collection}/text")]
 async fn save(
   identity: web::ReqData<Identity>,
@@ -65,6 +63,32 @@ async fn save(
       &data.db_pool,
       &site_name,
       &coll_name,
+    )
+    .await
+  {
+    Ok(text) => Ok(HttpResponse::Created().json(text)),
+    Err(e) => {
+      error!("Error saving content text {}", e);
+      Err(ScriptError::TextCreationFailure)
+    }
+  }
+}
+
+#[put("/site/{site}/collection/{collection}/text/{text_name}")]
+async fn update(
+  identity: web::ReqData<Identity>,
+  data: web::Data<AppData>,
+  update_text: web::Json<UpdateText>,
+  Path((site_name, coll_name, text_name)): Path<(String, String, String)>,
+) -> Result<HttpResponse, ScriptError> {
+  debug!("Got request for saving text data");
+  match update_text
+    .update(
+      &identity.into_inner(),
+      &data.db_pool,
+      &site_name,
+      &coll_name,
+      &text_name,
     )
     .await
   {

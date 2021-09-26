@@ -76,6 +76,7 @@ async fn main() -> Result<(), Error> {
             .service(collection::save)
             .service(text::save)
             .service(text::get_text)
+            .service(text::update)
     })
     .workers(workers)
     .bind(addr)?

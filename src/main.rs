@@ -9,17 +9,18 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use std::{io::Error, result::Result};
 
+mod asset;
 mod collection;
+mod common;
 mod config;
 mod constants;
+mod content;
 mod db;
 mod error;
 mod file;
+mod folder;
 mod rbac;
 mod site;
-mod content;
-mod asset;
-mod common;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
 
@@ -80,6 +81,8 @@ async fn main() -> Result<(), Error> {
             .service(content::save)
             .service(content::get_text)
             .service(content::update)
+            .service(folder::create)
+            .service(folder::get)
     })
     .workers(workers)
     .bind(addr)?

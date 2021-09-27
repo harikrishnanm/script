@@ -1,13 +1,13 @@
+pub mod content;
 pub mod models;
-pub mod text;
 
 use actix_web::{get, http, post, put, web, web::Path, HttpResponse};
 
 use log::*;
 
+use crate::content::models::*;
 use crate::error::ScriptError;
 use crate::rbac::models::Identity;
-use crate::content::models::*;
 use crate::AppData;
 
 #[get("/site/{site}/collection/{collection}/content/{content_name}")]

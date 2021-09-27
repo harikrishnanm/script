@@ -45,7 +45,7 @@ async fn get_file(
 
     //TODO Content dispositon
 }
-#[get("/site/{site_name}/folder/{folder:.*}")]
+#[get("/site/{site_name}/foldker/{folder:.*}")]
 async fn list(
     data: web::Data<AppData>,
     Path((site_name, folder)): Path<(String, String)>,
@@ -136,8 +136,11 @@ async fn upload(
                 }
                 let size = f.metadata().unwrap().len();
                 debug!("Filesize {}", size);
-                new_file.size = size as i32 ;
-                match new_file.update_size(identity.clone().into_inner(), &mut tx).await{
+                new_file.size = size as i32;
+                match new_file
+                    .update_size(identity.clone().into_inner(), &mut tx)
+                    .await
+                {
                     Ok(updated_file) => files.push(updated_file.to_owned()),
                     Err(e) => {
                         error!("Unable to compute file size {}", e);

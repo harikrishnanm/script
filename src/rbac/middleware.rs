@@ -6,9 +6,9 @@ use actix_web::{web::Data, Error, HttpMessage, HttpResponse};
 use futures::future::{ok, Either, Ready};
 use log::{debug, error, trace};
 
+use crate::rbac::models::Identity;
 use crate::rbac::{utils, Authenticate, RbacParams};
 use crate::AppData;
-use crate::rbac::models::Identity;
 
 impl<S, B> Transform<S> for Authenticate
 where
@@ -45,12 +45,11 @@ where
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
-
         let app_data = req.app_data::<Data<AppData>>().unwrap();
         trace!("Request {:?}", req);
 
         //Check if path and method combination needs to be authenticated
-        let path: String= req.path().to_string();
+        let path: String = req.path().to_string();
         debug!("Path requested {}", path);
 
         let method: String = req.method().to_string();
@@ -58,29 +57,25 @@ where
         //let unauthorized: HttpResponse<B> = HttpResponse::Unauthorized().finish().into_body();
 
         let is_public_path = match &req.app_data::<Data<AppData>>() {
-            Some(app_data) => {
-                match &app_data.rbac.lock() {
-                    Ok(rbac) => {
-                        rbac.pub_paths_regex_set.is_match(&path)
-                    },
-                    Err(e)=> {
-                        error!("Error getting lock on rbac policy");
-                        false
-                    }
+            Some(app_data) => match &app_data.rbac.lock() {
+                Ok(rbac) => rbac.pub_paths_regex_set.is_match(&path),
+                Err(e) => {
+                    error!("Error getting lock on rbac policy");
+                    false
                 }
-            }
+            },
             None => {
-               debug!("Cannot get app data");
-               false 
+                debug!("Cannot get app data");
+                false
             }
         };
 
         debug!("Is a public path {}", is_public_path);
-        if method == "GET" && is_public_path{
+        if method == "GET" && is_public_path {
             debug!("Public path..will continue without token validation");
             let anonymous = Identity {
                 user: "Anonymous".to_string(),
-                roles: vec!("ANONYMOUS".to_string()),
+                roles: vec!["ANONYMOUS".to_string()],
             };
             req.extensions_mut().insert(anonymous);
             return Either::Left(self.service.call(req));

@@ -176,7 +176,10 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
 
 
         if user == constants::WILDCARD && role == constants::WILDCARD && method == "GET" {
-            public_paths.push(path.clone());
+
+            let pub_path_str = format!("{}{}{}", constants::REGEX_PREFIX, path.clone(), constants::REGEX_STARTSWITH_SUFFIX );
+            debug!("Public path regex {}", pub_path_str);
+            public_paths.push(pub_path_str);
         }
 
         let mut regex_str = constants::REGEX_PREFIX.to_string();
@@ -224,11 +227,12 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
     trace!("Public paths vector {:?}", public_paths);
 
     let path_regex_set = RegexSet::new(path_regex).unwrap();
+    let pub_paths_regex_set = RegexSet::new(public_paths).unwrap();
     Ok(Rbac {
         path_regex_set: path_regex_set,
         methods: methods,
         users: users,
         roles: roles,
-        public_paths: public_paths,
+        pub_paths_regex_set: pub_paths_regex_set,
     })
 }

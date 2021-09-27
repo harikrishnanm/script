@@ -1,19 +1,19 @@
 use crate::rbac::models::Identity;
-use crate::text::models::*;
+use crate::content::models::*;
 use crate::DBPool;
 use log::*;
 use sqlx::Error;
 use uuid::Uuid;
 
-impl NewText {
+impl NewContent{
     pub async fn save(
         self: &Self,
         identity: &Identity,
         db_pool: &DBPool,
         site_name: &str,
         coll_name: &str,
-    ) -> Result<Text, Error> {
-        let text_id = Uuid::new_v4();
+    ) -> Result<Content, Error> {
+        let content_id = Uuid::new_v4();
 
         let site_id: Uuid =
             match sqlx::query!("SELECT site_id FROM site where name = $1", site_name)
@@ -46,14 +46,14 @@ impl NewText {
         updated_tags.push(self.name.clone());
 
         match sqlx::query_as!(
-            Text,
-            "INSERT INTO text (text_id, name, mime_type, site_id, site_name, 
+            Content,
+            "INSERT INTO text (content_id, name, mime_type, site_id, site_name, 
                 collection_id, collection_name, tags, content, 
                 content_length, cache_control, created_by)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-                RETURNING text_id, name, mime_type, site_id, 
+                RETURNING content_id, name, mime_type, site_id, 
                     collection_id, content_length, tags, created_by, modified, version",
-            text_id,
+            content_id,
             self.name,
             self.mime_type,
             site_id,
@@ -84,7 +84,7 @@ impl NewText {
     }
 }
 
-impl UpdateText {
+impl UpdateContent {
     pub async fn update(
         self: &Self,
         _identity: &Identity,
@@ -92,7 +92,7 @@ impl UpdateText {
         site_name: &str,
         coll_name: &str,
         text_name: &str,
-    ) -> Result<Text, Error> {
+    ) -> Result<Content, Error> {
         debug!("Updating content");
         info!("Updating content");
         let mut tx = match db_pool.begin().await {
@@ -106,10 +106,10 @@ impl UpdateText {
         debug!("Archiving existing version");
 
         match sqlx::query!("INSERT INTO text_archive 
-                (text_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, 
+                (content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, 
                 content, content_length, cache_control, version, created_by, created, modified)
             SELECT 
-                text_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, 
+                content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, 
                 content, content_length, cache_control, version, created_by, created, modified
                 from text 
             WHERE 
@@ -193,11 +193,11 @@ impl UpdateText {
         };
 
         match sqlx::query_as!(
-            Text,
+            Content,
             "UPDATE text SET mime_type = $1, tags = $2, 
                 content = $3, content_length = $4,  cache_control = $5, version = $6
             WHERE site_name = $7 AND collection_name = $8 AND name = $9 
-            RETURNING text_id, name, mime_type, site_id, 
+            RETURNING content_id, name, mime_type, site_id, 
                 collection_id, content_length, tags, created_by, modified, version",
             mime_type,
             &tags,

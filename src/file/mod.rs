@@ -52,7 +52,7 @@ async fn list(
 ) -> Result<HttpResponse, Error> {
     match sqlx::query_as!(
     File,
-    "SELECT file_id, name, original_name, cache_control, tags, folder, mime_type, site_name, created_by 
+    "SELECT file_id, name, original_name, cache_control, size, tags, folder, mime_type, site_name, created_by 
       FROM file WHERE site_name = $1 and folder = $2",
     site_name,
     folder
@@ -94,6 +94,7 @@ async fn upload(
         };
         debug!("File upload {:?}", field);
         let content_type = field.content_disposition().unwrap();
+        debug!("Headers {:?}", field.headers());
         let filename = content_type.get_filename().unwrap();
         let sanitized_filename = sanitize_filename::sanitize(&filename);
         //let filepath = format!("{}/{}", folder_name, sanitized_filename);
@@ -106,12 +107,13 @@ async fn upload(
 
         let tags = vec![sanitized_filename.clone(), site_name.clone()];
 
-        let new_file = File {
+        let mut new_file = File {
             file_id: Uuid::new_v4(),
             name: sanitized_filename.to_string(),
             original_name: filename.to_string(),
             cache_control: CACHE_CONTROL_DEFAULT.to_string(),
             folder: folder.clone(),
+            size: 0,
             tags: tags,
             mime_type: mime_type.to_string(),
             site_name: site_name.clone(),
@@ -132,8 +134,16 @@ async fn upload(
                     // filesystem operations are blocking, we have to use threadpool
                     f = web::block(move || f.write_all(&data).map(|_| f)).await?;
                 }
-                debug!("Pushing file struct {:?}", saved_file);
-                files.push(saved_file.to_owned());
+                let size = f.metadata().unwrap().len();
+                debug!("Filesize {}", size);
+                new_file.size = size as i32 ;
+                match new_file.update_size(identity.clone().into_inner(), &mut tx).await{
+                    Ok(updated_file) => files.push(updated_file.to_owned()),
+                    Err(e) => {
+                        error!("Unable to compute file size {}", e);
+                        files.push(saved_file.to_owned());
+                    }
+                };
             }
             Err(e) => {
                 error!("Error saving file {:?}  Error: {}", new_file, e);

@@ -12,7 +12,7 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
         None => {
             error!("No authentication header found");
             Err(AuthError {
-                err_type: "No Token".to_string(),
+                err_type: "Authorization".to_string(),
                 err_msg: "No Token found in request".to_string(),
             })
         }
@@ -27,7 +27,7 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
                     } else {
                         error!("Invalid token string. Does not start with Bearer or bearer");
                         return Err(AuthError {
-                            err_type: "Token error".to_string(),
+                            err_type: "Authorization".to_string(),
                             err_msg: "Invalid authorization token".to_string(),
                         });
                     }
@@ -35,7 +35,7 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
                 Err(e) => {
                     error!("Error converting token to string {}", e);
                     return Err(AuthError {
-                        err_type: "Token error".to_string(),
+                        err_type: "Authorization".to_string(),
                         err_msg: "Invalid token string".to_string(),
                     });
                 }
@@ -58,7 +58,7 @@ pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
                 Err(e) => {
                     error!("Decoding error {}", e);
                     Err(AuthError {
-                        err_type: "Token error".to_string(),
+                        err_type: "Authorization".to_string(),
                         err_msg: "Unable to decode token".to_string(),
                     })
                 }

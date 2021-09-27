@@ -61,13 +61,7 @@ where
             Some(app_data) => {
                 match &app_data.rbac.lock() {
                     Ok(rbac) => {
-                        let public_paths: &Vec<String> = &rbac.public_paths;
-                        debug!("Checking if {} is in {:?}", path, public_paths);
-                        if (*public_paths).contains(&path){
-                            true
-                        } else {
-                            false
-                        }
+                        rbac.pub_paths_regex_set.is_match(&path)
                     },
                     Err(e)=> {
                         error!("Error getting lock on rbac policy");

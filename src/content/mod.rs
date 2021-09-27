@@ -7,10 +7,10 @@ use log::*;
 
 use crate::error::ScriptError;
 use crate::rbac::models::Identity;
-use crate::text::models::*;
+use crate::content::models::*;
 use crate::AppData;
 
-#[get("/site/{site}/collection/{collection}/text/{text_name}")]
+#[get("/site/{site}/collection/{collection}/content/{content_name}")]
 async fn get_text(
   identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
@@ -49,15 +49,15 @@ async fn get_text(
   }
 }
 
-#[post("/site/{site}/collection/{collection}/text")]
+#[post("/site/{site}/collection/{collection}/content")]
 async fn save(
   identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
-  new_text: web::Json<NewText>,
+  new_content: web::Json<NewContent>,
   Path((site_name, coll_name)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
-  debug!("Got request for saving text data");
-  match new_text
+  debug!("Got request for saving Content data");
+  match new_content
     .save(
       &identity.into_inner(),
       &data.db_pool,
@@ -69,17 +69,17 @@ async fn save(
     Ok(text) => Ok(HttpResponse::Created().json(text)),
     Err(e) => {
       error!("Error saving content text {}", e);
-      Err(ScriptError::TextCreationFailure)
+      Err(ScriptError::ContentCreationFailure)
     }
   }
 }
 
-#[put("/site/{site}/collection/{collection}/text/{text_name}")]
+#[put("/site/{site}/collection/{collection}/content/{content_name}")]
 async fn update(
   identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
-  update_text: web::Json<UpdateText>,
-  Path((site_name, coll_name, text_name)): Path<(String, String, String)>,
+  update_text: web::Json<UpdateContent>,
+  Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
   debug!("Got request for saving text data");
   match update_text
@@ -88,14 +88,14 @@ async fn update(
       &data.db_pool,
       &site_name,
       &coll_name,
-      &text_name,
+      &content_name,
     )
     .await
   {
     Ok(text) => Ok(HttpResponse::Created().json(text)),
     Err(e) => {
       error!("Error saving content text {}", e);
-      Err(ScriptError::TextCreationFailure)
+      Err(ScriptError::ContentCreationFailure)
     }
   }
 }

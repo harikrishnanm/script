@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct NewText {
+pub struct NewContent {
     pub name: String,
     pub mime_type: Option<String>,
     pub tags: Vec<String>,
@@ -12,7 +12,7 @@ pub struct NewText {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct UpdateText {
+pub struct UpdateContent {
     pub mime_type: Option<String>,
     pub tags: Option<Vec<String>>,
     pub content: Option<String>,
@@ -20,8 +20,8 @@ pub struct UpdateText {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Text {
-    pub text_id: Uuid,
+pub struct Content {
+    pub content_id: Uuid,
     pub name: String,
     pub mime_type: Option<String>,
     pub site_id: Uuid,

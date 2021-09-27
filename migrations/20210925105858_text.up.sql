@@ -1,6 +1,6 @@
 CREATE TABLE text (
   id SERIAL PRIMARY KEY,
-  text_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
+  content_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
   name VARCHAR(50) NOT NULL,
   mime_type VARCHAR(50),
   tags VARCHAR(20)[] NOT NULL,
@@ -22,7 +22,7 @@ CREATE UNIQUE INDEX name_collection_site_uniq_idx ON text(name, site_id, collect
 
 CREATE TABLE text_archive (
   id SERIAL PRIMARY KEY,
-  text_id UUID NOT NULL DEFAULT uuid_generate_v4 (),
+  content_id UUID NOT NULL DEFAULT uuid_generate_v4 (),
   name VARCHAR(50) NOT NULL,
   mime_type VARCHAR(50),
   tags VARCHAR(20)[] NOT NULL,

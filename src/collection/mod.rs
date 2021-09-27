@@ -60,7 +60,7 @@ pub async fn get(
                     mime_type: row.mime_type.unwrap(),
                     tags: row.tags,
                     url: format!(
-                        "/site/{}/collection/{}/text/{}",
+                        "/site/{}/collection/{}/content/{}",
                         site_name, collection_name, row.name
                     ),
                 };

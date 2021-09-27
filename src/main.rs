@@ -17,7 +17,7 @@ mod error;
 mod file;
 mod rbac;
 mod site;
-mod text;
+mod content;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
 
@@ -75,9 +75,9 @@ async fn main() -> Result<(), Error> {
             .service(file::get_file)
             .service(collection::save)
             .service(collection::get)
-            .service(text::save)
-            .service(text::get_text)
-            .service(text::update)
+            .service(content::save)
+            .service(content::get_text)
+            .service(content::update)
     })
     .workers(workers)
     .bind(addr)?

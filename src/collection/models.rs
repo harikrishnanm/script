@@ -6,6 +6,7 @@ pub struct NewCollection {
     pub name: String,
     pub parent_id: Option<Uuid>,
     pub cache_control: Option<String>,
+    pub public: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

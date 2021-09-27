@@ -34,6 +34,7 @@ pub struct Rbac {
     pub methods: HashMap<usize, Vec<String>>,
     pub users: HashMap<usize, Vec<String>>,
     pub roles: HashMap<usize, Vec<String>>,
+    pub public_paths: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, Hash)]

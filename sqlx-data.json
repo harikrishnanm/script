@@ -1,67 +1,5 @@
 {
   "db": "PostgreSQL",
-  "1af17460060f334536edbe83b0426a6c98c426b7598802fff79c45d26775b474": {
-    "query": "INSERT INTO collection (collection_id, name, parent_id, cache_control, site_id, site_name, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)\n          RETURNING collection_id, name, parent_id, cache_control, site_id, site_name, created_by",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "collection_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "parent_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 3,
-          "name": "cache_control",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "site_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "site_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 6,
-          "name": "created_by",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "Varchar"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        true,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "1b52d168f3bc2e0b8efeeac4ddcc9f5c1342278d2629351507b4afc78f0cf1f5": {
     "query": "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)\n          VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
     "describe": {
@@ -555,6 +493,68 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "c13ebc668527e69fc6994c10ffb79953d18af24e370ef1bc742bc43d0ad874b9": {
+    "query": "INSERT INTO collection (collection_id, name, parent_id, cache_control, site_id, site_name, created_by)\n                VALUES ($1, $2, $3, $4, $5, $6, $7)\n                RETURNING collection_id, name, parent_id, cache_control, site_id, site_name, created_by",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "collection_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "parent_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "site_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 6,
+          "name": "created_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        true,
+        false,
+        false,
+        false,
         false
       ]
     }

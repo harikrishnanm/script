@@ -164,6 +164,7 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
     let mut methods: HashMap<usize, Vec<String>> = HashMap::new();
     let mut users: HashMap<usize, Vec<String>> = HashMap::new();
     let mut roles: HashMap<usize, Vec<String>> = HashMap::new();
+    let mut public_paths: Vec<String> = Vec::new();
     let mut idx: usize = 0;
 
     for row in rows {
@@ -172,6 +173,11 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
         let user = row.rbac_user;
         let role = row.rbac_role;
         let path_match = row.path_match;
+
+
+        if user == constants::WILDCARD && role == constants::WILDCARD && method == "GET" {
+            public_paths.push(path.clone());
+        }
 
         let mut regex_str = constants::REGEX_PREFIX.to_string();
         let _ = &regex_str.push_str(&path);
@@ -215,6 +221,7 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
     trace!("Methods hashmap {:?}", methods);
     trace!("Users hashmap {:?}", users);
     trace!("Roles hashmap {:?}", roles);
+    trace!("Public paths vector {:?}", public_paths);
 
     let path_regex_set = RegexSet::new(path_regex).unwrap();
     Ok(Rbac {
@@ -222,5 +229,6 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
         methods: methods,
         users: users,
         roles: roles,
+        public_paths: public_paths,
     })
 }

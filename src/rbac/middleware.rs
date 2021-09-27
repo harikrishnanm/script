@@ -8,6 +8,7 @@ use log::{debug, error, trace};
 
 use crate::rbac::{utils, Authenticate, RbacParams};
 use crate::AppData;
+use crate::rbac::models::Identity;
 
 impl<S, B> Transform<S> for Authenticate
 where
@@ -44,15 +45,53 @@ where
     }
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
+
+        let app_data = req.app_data::<Data<AppData>>().unwrap();
         trace!("Request {:?}", req);
 
         //Check if path and method combination needs to be authenticated
-        let path = &req.path().to_string();
+        let path: String= req.path().to_string();
         debug!("Path requested {}", path);
 
-        let method = &req.method().to_string();
+        let method: String = req.method().to_string();
         debug!("Method requested {}", method);
         //let unauthorized: HttpResponse<B> = HttpResponse::Unauthorized().finish().into_body();
+
+        let is_public_path = match &req.app_data::<Data<AppData>>() {
+            Some(app_data) => {
+                match &app_data.rbac.lock() {
+                    Ok(rbac) => {
+                        let public_paths: &Vec<String> = &rbac.public_paths;
+                        debug!("Checking if {} is in {:?}", path, public_paths);
+                        if (*public_paths).contains(&path){
+                            true
+                        } else {
+                            false
+                        }
+                    },
+                    Err(e)=> {
+                        error!("Error getting lock on rbac policy");
+                        false
+                    }
+                }
+            }
+            None => {
+               debug!("Cannot get app data");
+               false 
+            }
+        };
+
+        debug!("Is a public path {}", is_public_path);
+        if method == "GET" && is_public_path{
+            debug!("Public path..will continue without token validation");
+            let anonymous = Identity {
+                user: "Anonymous".to_string(),
+                roles: vec!("ANONYMOUS".to_string()),
+            };
+            req.extensions_mut().insert(anonymous);
+            return Either::Left(self.service.call(req));
+        }
+
         let identity = match utils::check_token(&req) {
             Err(auth_error) => {
                 error!("Authentication error {:?}", auth_error);
@@ -71,8 +110,6 @@ where
         };
 
         debug!("Rbac Params {:?}", rbac_params);
-
-        let app_data = req.app_data::<Data<AppData>>().unwrap();
 
         match utils::check_rbac(rbac_params, app_data) {
             Ok(_) => {

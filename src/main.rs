@@ -18,6 +18,8 @@ mod file;
 mod rbac;
 mod site;
 mod content;
+mod asset;
+mod common;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
 

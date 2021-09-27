@@ -14,14 +14,14 @@ use crate::AppData;
 async fn get_text(
   identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
-  Path((site_name, coll_name, text_name)): Path<(String, String, String)>,
+  Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
   match sqlx::query!(
     "SELECT content, mime_type, cache_control FROM text 
       WHERE site_name = $1 AND collection_name = $2 AND name = $3",
     site_name,
     coll_name,
-    text_name
+    content_name
   )
   .fetch_one(&data.db_pool)
   .await

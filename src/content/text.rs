@@ -1,6 +1,7 @@
 use crate::rbac::models::Identity;
 use crate::content::models::*;
 use crate::DBPool;
+use crate::common::utils;
 use log::*;
 use sqlx::Error;
 use uuid::Uuid;
@@ -15,29 +16,10 @@ impl NewContent{
     ) -> Result<Content, Error> {
         let content_id = Uuid::new_v4();
 
-        let site_id: Uuid =
-            match sqlx::query!("SELECT site_id FROM site where name = $1", site_name)
-                .fetch_one(db_pool)
-                .await
-            {
-                Ok(site_id) => site_id.site_id,
-                Err(e) => {
-                    error!("Could not fetch site id {}", e);
-                    return Err(e);
-                }
-            };
-
-        let collection_id: Uuid = match sqlx::query!(
-            "SELECT collection_id FROM collection where site_name = $1 and name = $2",
-            site_name,
-            coll_name
-        )
-        .fetch_one(db_pool)
-        .await
-        {
-            Ok(collection_id) => collection_id.collection_id,
+        let (site_id, collection_id) = match utils::get_site_and_coll_id(site_name, coll_name, db_pool).await {
+            Ok(site_id) => site_id,
             Err(e) => {
-                error!("Could not fetch collection id {}", e);
+                error!("Could not fetch site id {}", e);
                 return Err(e);
             }
         };
@@ -126,9 +108,6 @@ impl UpdateContent {
             }
         };
         debug!("Archival complete");
-
-        //let (mut mime_type, mut content, mut cache_control, mut tags) =
-        //    (String::new(), String::new(), String::new(), Vec::new());
 
         let (old_version, mut mime_type, mut content, mut cache_control, mut tags) =
             match sqlx::query!(

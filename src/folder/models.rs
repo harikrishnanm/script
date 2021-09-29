@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::ffi::OsString;
 use validator::Validate;
 
 #[derive(Deserialize, Debug, Validate)]

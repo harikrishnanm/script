@@ -7,7 +7,7 @@ use crate::folder::models::*;
 use crate::rbac::models::Identity;
 use crate::AppData;
 use actix_web::{
-  get, patch, post,
+  get, patch,
   web::{Data, Path, ReqData},
   HttpResponse,
 };

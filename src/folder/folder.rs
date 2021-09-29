@@ -21,9 +21,15 @@ impl NewFolder {
         "/tmp".to_string()
       }
     };
-
-    let parent_path_str = format!("{}/{}/{}/{}", root_path, site_name, parent, folder_name);
-    debug!("Parent path {}", parent_path_str);
+    debug!("Parent path {}", parent);
+    let mut parent_path_str = String::new();
+    if !parent.eq_ignore_ascii_case("root") {
+      parent_path_str = format!("{}/{}/{}/{}", root_path, site_name, parent, folder_name);
+    } else {
+      parent_path_str = format!("{}/{}/{}", root_path, site_name, folder_name);
+    }
+    
+    debug!("Full path {}", parent_path_str);
     let parent_path = Path::new(&parent_path_str);
 
     if parent_path.exists() {

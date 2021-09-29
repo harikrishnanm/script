@@ -1,6 +1,7 @@
 pub mod folder;
 pub mod models;
 
+use crate::common::utils;
 use crate::error::ScriptError;
 use crate::folder::models::*;
 use crate::rbac::models::Identity;
@@ -12,8 +13,15 @@ use actix_web::{
 };
 use actix_web_validator::Json;
 use log::*;
-use std::env;
 use std::fs;
+
+/* Create folder code to be added under put/patch
+debug!("Create folder {}", &folder_name);
+    DirBuilder::new()
+        .recursive(true)
+        .create(&folder_name)
+        .unwrap();
+        */
 
 #[get("/site/{site_name}/folder/{folder:.*}")]
 pub async fn get(
@@ -21,22 +29,44 @@ pub async fn get(
   data: Data<AppData>,
   Path((site_name, folder)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
-  let root_path = match env::var("FILE_STORE_ROOT") {
-    Ok(root) => root,
-    Err(e) => {
-      error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./tmp");
-      "/tmp".to_string()
-    }
-  };
+  let mut subfolders: Vec<FolderEntry> = Vec::new();
+  let mut files: Vec<FileEntry> = Vec::new();
 
-  let full_path = format!("{}/{}/{}", root_path, site_name, folder);
+  let root_path = utils::get_root_path();
+
+  let base_path = format!("{}/{}", root_path, site_name);
+  let base_path_len = base_path.len();
+  let full_path = format!("{}/{}", base_path, folder);
   debug!("Getting details for {}", full_path);
   let path = std::path::Path::new(&full_path);
-  for entry in fs::read_dir(full_path).unwrap() {
-    let dir = entry.unwrap();
-    debug!("dir {:?}", dir.path());
+
+  if let Ok(entries) = fs::read_dir(full_path) {
+    for entry in entries {
+      if let Ok(entry) = entry {
+        if let Ok(metadata) = entry.metadata() {
+          debug!("{:?}: {:?}", entry.path(), metadata);
+          if metadata.is_file() {
+            let file_name = format!("{:?}", entry.file_name());
+            files.push(FileEntry {
+              name: entry.file_name().into_string().unwrap(),
+              size: metadata.len(),
+            });
+          } else if metadata.is_dir() {
+            let mut path = entry.path().to_str().unwrap().to_string();
+            path.replace_range(..base_path_len, "");
+            subfolders.push(FolderEntry { name: path })
+          }
+        } else {
+          error!("Couldnt get file metadata")
+        }
+      }
+    }
   }
-  Ok(HttpResponse::Ok().finish())
+  let response = FolderListing {
+    files: files,
+    folders: subfolders,
+  };
+  Ok(HttpResponse::Ok().json(response))
 }
 
 #[patch("/site/{site_name}/folder/{parent:.*}")]

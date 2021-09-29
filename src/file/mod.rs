@@ -1,13 +1,14 @@
 pub mod file;
 pub mod models;
 
-use std::io::Write;
-
+use crate::common::utils;
 use crate::file::models::File;
 use crate::rbac::models::Identity;
 use crate::AppData;
 use actix_files::NamedFile;
 use actix_multipart::Multipart;
+use std::fs;
+use std::io::Write;
 //use actix_web::http::header::{ContentDisposition, DispositionType};
 use actix_web::{get, post, web, web::Path, Error, HttpResponse};
 use futures::{StreamExt, TryStreamExt};
@@ -74,15 +75,23 @@ async fn upload(
     identity: web::ReqData<Identity>,
     data: web::Data<AppData>,
     Path((site_name, folder)): Path<(String, String)>,
-) -> Result<HttpResponse, Error> {
+) -> Result<HttpResponse, ScriptError> {
     let mut files: Vec<File> = Vec::new();
 
-    let folder_name = format!("./tmp/{}", folder);
-    debug!("Create folder {}", &folder_name);
-    DirBuilder::new()
-        .recursive(true)
-        .create(&folder_name)
-        .unwrap();
+    let root_path = utils::get_root_path();
+    let folder_name: &str = &format!("{}/{}/{}", root_path, site_name, folder);
+    debug!("Path {}", folder_name);
+    //check if folder exixts
+
+    if let Ok(metadata) = fs::metadata(folder_name) {
+        if !metadata.is_dir() {
+            error!("Path is not a directory");
+            return Err(ScriptError::FileNotFound);
+        }
+    } else {
+        error!("Path does not exist");
+        return Err(ScriptError::FileNotFound);
+    }
 
     while let Ok(Some(mut field)) = payload.try_next().await {
         let mut tx = match data.db_pool.begin().await {
@@ -123,7 +132,7 @@ async fn upload(
         match new_file.save(identity.clone().into_inner(), &mut tx).await {
             Ok(saved_file) => {
                 // File::create is blocking operation, use threadpool
-                let full_path = format!("{}/{}", &folder_name, sanitized_filename);
+                let full_path = format!("{}/{}", folder_name, sanitized_filename);
                 let mut f = web::block(|| std::fs::File::create(full_path))
                     .await
                     .unwrap();
@@ -132,7 +141,13 @@ async fn upload(
                 while let Some(chunk) = field.next().await {
                     let data = chunk.unwrap();
                     // filesystem operations are blocking, we have to use threadpool
-                    f = web::block(move || f.write_all(&data).map(|_| f)).await?;
+                    f = match web::block(move || f.write_all(&data).map(|_| f)).await {
+                        Ok(f) => f,
+                        Err(e) => {
+                            error!("Error saving file");
+                            return Err(ScriptError::FileNotFound);
+                        }
+                    }
                 }
                 let size = f.metadata().unwrap().len();
                 debug!("Filesize {}", size);

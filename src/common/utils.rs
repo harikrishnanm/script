@@ -1,8 +1,20 @@
 use crate::DBPool;
 use sqlx::Error;
+use std::env;
 use uuid::Uuid;
 
 use log::*;
+
+pub fn get_root_path() -> String {
+    let root_path = match env::var("FILE_STORE_ROOT") {
+        Ok(root) => root,
+        Err(e) => {
+            error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./tmp");
+            "/tmp".to_string()
+        }
+    };
+    root_path
+}
 
 pub async fn get_file_name(file_id: &Uuid, db_pool: &DBPool) -> Result<String, Error> {
     let file_name: String = match sqlx::query!("SELECT name FROM file WHERE file_id = $1", file_id)

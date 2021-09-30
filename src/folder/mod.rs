@@ -15,6 +15,8 @@ use actix_web_validator::Json;
 use log::*;
 use std::fs;
 
+use std::env;
+
 /* Create folder code to be added under put/patch
 debug!("Create folder {}", &folder_name);
     DirBuilder::new()
@@ -73,19 +75,50 @@ pub async fn get(
 pub async fn create(
   identity: ReqData<Identity>,
   data: Data<AppData>,
-  new_folder: Json<NewFolder>,
+  new_folder_req: Json<NewFolder>,
   Path((site_name, parent)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
   debug!("Creating folder {}", parent);
 
+  let new_folder = new_folder_req.into_inner();
   let folder_name = &new_folder.name;
-  match new_folder
-    .create_folder(&site_name, &parent, folder_name)
-    .await
-  {
-    Ok(_) => debug!("done"),
-    Err(e) => error!("{}", e),
-  }
 
-  Ok(HttpResponse::Ok().finish())
+  let folder_path = format!("{}/{}/{}", site_name, parent, folder_name);
+
+  match new_folder.create_folder(&folder_path).await {
+    Ok(_) => {
+      debug!("Created folder");
+      Ok(HttpResponse::Created().finish())
+    }
+    Err(e) => {
+      error!("Error creating dir {}", e);
+      Err(ScriptError::FolderCreationError)
+    }
+  }
+}
+
+#[patch("/site/{site_name}/folder")]
+pub async fn create_root(
+  identity: ReqData<Identity>,
+  data: Data<AppData>,
+  new_folder_req: Json<NewFolder>,
+  Path(site_name): Path<String>,
+) -> Result<HttpResponse, ScriptError> {
+  debug!("Creating folder in root");
+
+  let new_folder = new_folder_req.into_inner();
+  let folder_name = &new_folder.name;
+
+  let folder_path = format!("{}/{}", site_name, folder_name);
+
+  match new_folder.create_folder(&folder_path).await {
+    Ok(_) => {
+      debug!("Created folder");
+      Ok(HttpResponse::Created().finish())
+    }
+    Err(e) => {
+      error!("Error creating dir {}", e);
+      Err(ScriptError::FolderCreationError)
+    }
+  }
 }

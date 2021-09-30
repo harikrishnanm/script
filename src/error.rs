@@ -11,8 +11,10 @@ pub enum ScriptError {
     UnexpectedRbacCreationFailure,
     #[display(fmt = "Could not save text")]
     ContentCreationFailure,
-    #[display(fmt = "Requested File not found")]
+    #[display(fmt = "Requested resource not found")]
     FileNotFound,
+    #[display(fmt = "Error creating folder")]
+    FolderCreationError,
     #[display(fmt = "This request cannot be processed. {}", _0)]
     BadRequest(String),
 }
@@ -46,6 +48,7 @@ impl ResponseError for ScriptError {
             ScriptError::FileNotFound => StatusCode::NOT_FOUND,
             ScriptError::BadRequest(_) => StatusCode::BAD_REQUEST,
             ScriptError::ContentCreationFailure => StatusCode::INTERNAL_SERVER_ERROR,
+            ScriptError::FolderCreationError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

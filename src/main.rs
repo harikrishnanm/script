@@ -81,6 +81,7 @@ async fn main() -> Result<(), Error> {
             .service(content::save)
             .service(content::get_text)
             .service(content::update)
+            .service(folder::create_root)
             .service(folder::create)
             .service(folder::get)
     })

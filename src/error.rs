@@ -15,6 +15,8 @@ pub enum ScriptError {
     FileNotFound,
     #[display(fmt = "Error creating folder")]
     FolderCreationError,
+    #[display(fmt = "Error creating file")]
+    FileCreationError,
     #[display(fmt = "This request cannot be processed. {}", _0)]
     BadRequest(String),
 }
@@ -49,6 +51,7 @@ impl ResponseError for ScriptError {
             ScriptError::BadRequest(_) => StatusCode::BAD_REQUEST,
             ScriptError::ContentCreationFailure => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::FolderCreationError => StatusCode::INTERNAL_SERVER_ERROR,
+            ScriptError::FileCreationError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

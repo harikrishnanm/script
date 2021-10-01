@@ -23,11 +23,11 @@ pub struct Collection {
 #[derive(Serialize, Debug)]
 pub struct CollectionResponse {
     pub name: String,
-    pub content: Vec<TextContent>,
+    pub content: Vec<Content>,
 }
 
 #[derive(Serialize, Debug)]
-pub struct TextContent {
+pub struct Content {
     pub name: String,
     pub tags: Vec<String>,
     pub content: String,

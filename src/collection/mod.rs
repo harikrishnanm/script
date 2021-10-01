@@ -51,10 +51,10 @@ pub async fn get(
     .await
     {
         Ok(rows) => {
-            let mut content_arr: Vec<TextContent> = Vec::new();
+            let mut content_arr: Vec<Content> = Vec::new();
             for row in rows {
                 debug!("Got row {:?}", row);
-                let content = TextContent {
+                let content = Content {
                     name: row.name.clone(),
                     content: row.content,
                     mime_type: row.mime_type.unwrap(),

@@ -15,19 +15,19 @@ use futures::{StreamExt, TryStreamExt};
 use log::*;
 
 use crate::error::ScriptError;
-use std::fs::DirBuilder;
-
 use uuid::Uuid;
 
 use crate::constants::*;
 
-#[get("/site/{site_name}/file/{file_name:.*}")]
+#[get("/site/{site_name}/file/{file:.*}")]
 async fn get_file(
     data: web::Data<AppData>,
-    Path((site_name, file_name)): Path<(String, String)>,
+    Path((site_name, file)): Path<(String, String)>,
 ) -> Result<NamedFile, ScriptError> {
-    debug!("Request file {}", file_name);
-    let full_file_name = format!("./tmp/{}", file_name);
+    debug!("Request file {}", file);
+    let root_path = utils::get_root_path();
+    let full_file_name = format!("{}/{}/{}", root_path, site_name, file);
+    debug!("Opening file {}", full_file_name);
     match NamedFile::open(full_file_name) {
         Ok(file) => {
             if file.metadata().unwrap().is_dir() {
@@ -144,8 +144,8 @@ async fn upload(
                     f = match web::block(move || f.write_all(&data).map(|_| f)).await {
                         Ok(f) => f,
                         Err(e) => {
-                            error!("Error saving file");
-                            return Err(ScriptError::FileNotFound);
+                            error!("Error saving file {}", e);
+                            return Err(ScriptError::FileCreationError);
                         }
                     }
                 }
@@ -162,13 +162,14 @@ async fn upload(
                         files.push(saved_file.to_owned());
                     }
                 };
+                let _ = tx.commit().await;
             }
             Err(e) => {
                 error!("Error saving file {:?}  Error: {}", new_file, e);
-                //tx.rollback().await;
+                let _ = tx.rollback().await;
+                return Err(ScriptError::FileCreationError);
             }
         };
-        let _ = tx.commit().await;
     }
     Ok(HttpResponse::Ok().json(files))
 }

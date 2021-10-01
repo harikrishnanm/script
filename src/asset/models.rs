@@ -1,20 +1,21 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-#[derive(Serialize, Debug)]
+#[derive(Deserialize, Debug)]
 pub struct NewAsset {
-  name: String,
-  file_id: Uuid,
-  content_disposition: String,
+  pub name: String,
+  pub file_id: Uuid,
+  //pub file_name: String,
+  pub content_disposition: String,
 }
 
 #[derive(Serialize, Debug)]
 pub struct Asset {
-  name: String,
-  file_id: Uuid,
-  file_name: String,
-  site_id: Uuid,
-  site_name: String,
-  coll_id: Uuid,
-  coll_name: String,
+  pub name: String,
+  pub file_id: Uuid,
+  pub file_name: String,
+  pub site_id: Uuid,
+  pub site_name: String,
+  pub coll_id: Uuid,
+  pub coll_name: String,
 }

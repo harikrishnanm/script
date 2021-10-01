@@ -8,8 +8,8 @@ CREATE TABLE file (
   tags VARCHAR(50) [] NOT NULL,
   size INTEGER NOT NULL, 
   mime_type VARCHAR(50) NOT NULL,
-  folder VARCHAR(25) NOT NULL DEFAULT 'root',
-  parent_folder VARCHAR(200),
+  path VARCHAR(100) NOT NULL,
+  slug VARCHAR(40),
   site_name VARCHAR(50) NOT NULL,
   created_by VARCHAR(50) NOT NULL,
   created TIMESTAMP NOT NULL DEFAULT current_timestamp,
@@ -17,4 +17,5 @@ CREATE TABLE file (
   CONSTRAINT site_name_fk FOREIGN KEY (site_name) REFERENCES site(name) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE UNIQUE INDEX filename_folder_site_uniq_idx ON file(name, folder, site_name);
+CREATE UNIQUE INDEX filename_folder_site_uniq_idx ON file(name, path, site_name);
+CREATE UNIQUE INDEX slug_name_uniq_idx ON file(slug, site_name);

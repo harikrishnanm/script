@@ -53,8 +53,8 @@ async fn list(
 ) -> Result<HttpResponse, Error> {
     match sqlx::query_as!(
     File,
-    "SELECT file_id, name, original_name, cache_control, size, tags, folder, mime_type, site_name, created_by 
-      FROM file WHERE site_name = $1 and folder = $2",
+    "SELECT file_id, name, original_name, cache_control, size, tags, path, mime_type, site_name, created_by 
+      FROM file WHERE site_name = $1 and path = $2",
     site_name,
     folder
   )
@@ -121,7 +121,7 @@ async fn upload(
             name: sanitized_filename.to_string(),
             original_name: filename.to_string(),
             cache_control: CACHE_CONTROL_DEFAULT.to_string(),
-            folder: folder.clone(),
+            path: folder.clone(),
             size: 0,
             tags: tags,
             mime_type: mime_type.to_string(),

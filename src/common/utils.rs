@@ -5,29 +5,36 @@ use uuid::Uuid;
 
 use log::*;
 
+use crate::file::models::FileDetails;
+
 pub fn get_root_path() -> String {
     let root_path = match env::var("FILE_STORE_ROOT") {
         Ok(root) => root,
         Err(e) => {
-            error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./tmp");
-            "/tmp".to_string()
+            error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./file_store");
+            "/file_store".to_string()
         }
     };
     root_path
 }
 
-pub async fn get_file_name(file_id: &Uuid, db_pool: &DBPool) -> Result<String, Error> {
-    let file_name: String = match sqlx::query!("SELECT name FROM file WHERE file_id = $1", file_id)
-        .fetch_one(db_pool)
-        .await
+pub async fn get_file_details(file_id: &Uuid, db_pool: &DBPool) -> Result<FileDetails, Error> {
+    let file_details: FileDetails = match sqlx::query_as!(
+        FileDetails,
+        "SELECT file_id, name, original_name, cache_control, tags, 
+        size, path, mime_type FROM file WHERE file_id = $1",
+        file_id
+    )
+    .fetch_one(db_pool)
+    .await
     {
-        Ok(result) => result.name,
+        Ok(result) => result,
         Err(e) => {
             error!("Error getting file name {}", e);
             return Err(e);
         }
     };
-    Ok(file_name)
+    Ok(file_details)
 }
 
 pub async fn get_site_id(site_name: &str, db_pool: &DBPool) -> Result<Uuid, Error> {

@@ -23,14 +23,26 @@ pub struct Collection {
 #[derive(Serialize, Debug)]
 pub struct CollectionResponse {
     pub name: String,
-    pub content: Vec<Content>,
+    pub contents: Vec<Content>,
+    pub assets: Vec<Asset>,
 }
 
 #[derive(Serialize, Debug)]
 pub struct Content {
+    pub id: Uuid,
     pub name: String,
     pub tags: Vec<String>,
     pub content: String,
+    pub mime_type: Option<String>,
+    pub url: Option<String>,
+}
+
+#[derive(Serialize, Debug)]
+pub struct Asset {
+    pub id: Uuid,
+    pub name: String,
+    pub file_name: String,
     pub mime_type: String,
-    pub url: String,
+    pub path: String,
+    pub size: i32,
 }

@@ -6,6 +6,7 @@ use crate::error::ScriptError;
 use crate::rbac::models::Identity;
 use crate::AppData;
 use actix_web::{get, http::header::*, post, web, web::Path, HttpResponse};
+use futures::try_join;
 use log::*;
 
 #[get("/site/{site_name}/collection/{collection_name}")]
@@ -42,8 +43,52 @@ pub async fn get(
 
     // get all text/content  for given
 
-    match sqlx::query!(
-        "SELECT * FROM text WHERE site_name = $1 AND collection_name = $2",
+    let mut contents: Vec<Content> = Vec::new();
+    let mut assets: Vec<Asset> = Vec::new();
+
+    let content_query_fut = sqlx::query_as!(
+        Content,
+        "SELECT content_id as id, name, content, mime_type, tags, 
+        site_name||'/'||collection_name||'/'||name as url
+         FROM content WHERE site_name = $1 AND collection_name = $2",
+        site_name,
+        collection_name
+    )
+    .fetch_all(&data.db_pool);
+
+    let asset_query_fut = sqlx::query_as!(
+        Asset,
+        "SELECT asset.asset_id as id, asset.name, 
+            file.name as file_name, file.mime_type, file.path, file.size
+        FROM asset 
+        INNER JOIN file 
+        ON asset.file_id = file.file_id 
+        AND asset.coll_name = $1
+        AND asset.site_name = $2",
+        collection_name,
+        site_name
+    )
+    .fetch_all(&data.db_pool);
+
+    match try_join!(content_query_fut, asset_query_fut) {
+        Ok((contents, assets)) => {
+            debug!("Result {:?},## {:?}", contents, assets);
+            let response = CollectionResponse {
+                name: collection_name,
+                contents: contents,
+                assets: assets,
+            };
+            let mut builder = HttpResponse::Ok();
+            Ok(builder.header(CACHE_CONTROL, cache_control).json(response))
+        }
+        Err(e) => {
+            error!("Error {}", e);
+            Err(ScriptError::FileNotFound)
+        }
+    }
+
+    /*match sqlx::query!(
+        "SELECT * FROM content WHERE site_name = $1 AND collection_name = $2",
         site_name,
         collection_name
     )
@@ -51,10 +96,10 @@ pub async fn get(
     .await
     {
         Ok(rows) => {
-            let mut content_arr: Vec<Content> = Vec::new();
             for row in rows {
                 debug!("Got row {:?}", row);
                 let content = Content {
+                    id: row.content_id,
                     name: row.name.clone(),
                     content: row.content,
                     mime_type: row.mime_type.unwrap(),
@@ -64,21 +109,24 @@ pub async fn get(
                         site_name, collection_name, row.name
                     ),
                 };
-                content_arr.push(content);
+                contents.push(content);
             }
-            let response = CollectionResponse {
-                name: collection_name,
-                content: content_arr,
-            };
-
-            let mut builder = HttpResponse::Ok();
-            Ok(builder.header(CACHE_CONTROL, cache_control).json(response))
         }
         Err(e) => {
-            error!("Error getting rows {}", e);
-            Err(ScriptError::FileNotFound)
+            error!("Error getting content {}", e);
+            return Err(ScriptError::FileNotFound);
         }
-    }
+    }*/
+
+    // Get assets
+
+    /*let response = CollectionResponse {
+        name: collection_name,
+        content: contents,
+    };
+
+    let mut builder = HttpResponse::Ok();
+    Ok(builder.header(CACHE_CONTROL, cache_control).json(response))*/
 }
 
 #[post("/site/{site_name}/collection")]

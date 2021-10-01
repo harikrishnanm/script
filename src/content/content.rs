@@ -29,7 +29,7 @@ impl NewContent{
 
         match sqlx::query_as!(
             Content,
-            "INSERT INTO text (content_id, name, mime_type, site_id, site_name, 
+            "INSERT INTO content (content_id, name, mime_type, site_id, site_name, 
                 collection_id, collection_name, tags, content, 
                 content_length, cache_control, created_by)
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
@@ -59,7 +59,7 @@ impl NewContent{
         {
             Ok(text) => Ok(text),
             Err(e) => {
-                error!("Error saving text {}", e);
+                error!("Error saving content {}", e);
                 Err(e)
             }
         }
@@ -87,13 +87,13 @@ impl UpdateContent {
 
         debug!("Archiving existing version");
 
-        match sqlx::query!("INSERT INTO text_archive 
+        match sqlx::query!("INSERT INTO content_archive 
                 (content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, 
                 content, content_length, cache_control, version, created_by, created, modified)
             SELECT 
                 content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, 
                 content, content_length, cache_control, version, created_by, created, modified
-                from text 
+                from content
             WHERE 
                 site_name = $1 AND collection_name = $2 AND name = $3", 
         site_name,
@@ -111,7 +111,7 @@ impl UpdateContent {
 
         let (old_version, mut mime_type, mut content, mut cache_control, mut tags) =
             match sqlx::query!(
-            "SELECT  mime_type, tags, content, cache_control, version FROM text WHERE site_name = $1 AND collection_name = $2 AND name = $3",
+            "SELECT  mime_type, tags, content, cache_control, version FROM content WHERE site_name = $1 AND collection_name = $2 AND name = $3",
             site_name, coll_name, text_name
         )
             .fetch_one(&mut tx)
@@ -173,7 +173,7 @@ impl UpdateContent {
 
         match sqlx::query_as!(
             Content,
-            "UPDATE text SET mime_type = $1, tags = $2, 
+            "UPDATE content SET mime_type = $1, tags = $2, 
                 content = $3, content_length = $4,  cache_control = $5, version = $6
             WHERE site_name = $7 AND collection_name = $8 AND name = $9 
             RETURNING content_id, name, mime_type, site_id, 

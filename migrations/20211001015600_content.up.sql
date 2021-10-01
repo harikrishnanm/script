@@ -1,4 +1,4 @@
-CREATE TABLE text (
+CREATE TABLE content (
   id SERIAL PRIMARY KEY,
   content_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
   name VARCHAR(50) NOT NULL,
@@ -18,9 +18,9 @@ CREATE TABLE text (
   CONSTRAINT collection_id_fk FOREIGN KEY (collection_id) REFERENCES collection(collection_id) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT site_id_fk FOREIGN KEY (site_id) REFERENCES site(site_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
-CREATE UNIQUE INDEX name_collection_site_uniq_idx ON text(name, site_id, collection_id);
+CREATE UNIQUE INDEX name_collection_site_uniq_idx ON content(name, site_id, collection_id);
 
-CREATE TABLE text_archive (
+CREATE TABLE content_archive (
   id SERIAL PRIMARY KEY,
   content_id UUID NOT NULL DEFAULT uuid_generate_v4 (),
   name VARCHAR(50) NOT NULL,

@@ -85,6 +85,7 @@ async fn main() -> Result<(), Error> {
             .service(folder::create)
             .service(folder::get)
             .service(folder::get_root)
+            .service(asset::save)
     })
     .workers(workers)
     .bind(addr)?

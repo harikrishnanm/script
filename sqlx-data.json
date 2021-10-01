@@ -1,7 +1,41 @@
 {
   "db": "PostgreSQL",
-  "14f01084146c29ec94fb83c7771dfec52a3851ffd14aef382e39650a3f4435ab": {
-    "query": "UPDATE file SET size = $1 WHERE file_id = $2 RETURNING file_id, name, original_name,cache_control, tags, size,  folder, mime_type, site_name, created_by ",
+  "049acba93c3cc729222b6208413ddeaadba1454c39032d13db501e40979cad84": {
+    "query": "SELECT content, mime_type, cache_control FROM content\n      WHERE site_name = $1 AND collection_name = $2 AND name = $3",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false
+      ]
+    }
+  },
+  "0756ae4cfc95e84a8739a1c288e2233eeeedf8e30fb50d0478c78cb78890bc34": {
+    "query": "UPDATE file SET size = $1 WHERE file_id = $2 RETURNING file_id, name, original_name,cache_control, tags, size,  path, mime_type, site_name, created_by ",
     "describe": {
       "columns": [
         {
@@ -36,7 +70,7 @@
         },
         {
           "ordinal": 6,
-          "name": "folder",
+          "name": "path",
           "type_info": "Varchar"
         },
         {
@@ -149,13 +183,13 @@
       ]
     }
   },
-  "31ad2815af829343584aab8d597cda67618e7be66a00d20ebeab96900835cea3": {
-    "query": "INSERT INTO text (content_id, name, mime_type, site_id, site_name, \n                collection_id, collection_name, tags, content, \n                content_length, cache_control, created_by)\n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) \n                RETURNING content_id, name, mime_type, site_id, \n                    collection_id, content_length, tags, created_by, modified, version",
+  "234d8459bed0c1f75f2adfc2a51054e6972cf266d3fd199eda49239ab1adcad4": {
+    "query": "INSERT INTO file (file_id, name, original_name, cache_control, size, tags, path, mime_type, site_name, created_by) \n      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) \n        RETURNING file_id, name, original_name,cache_control, tags, size,  path, mime_type, site_name, created_by",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "content_id",
+          "name": "file_id",
           "type_info": "Uuid"
         },
         {
@@ -165,43 +199,43 @@
         },
         {
           "ordinal": 2,
-          "name": "mime_type",
+          "name": "original_name",
           "type_info": "Varchar"
         },
         {
           "ordinal": 3,
-          "name": "site_id",
-          "type_info": "Uuid"
+          "name": "cache_control",
+          "type_info": "Varchar"
         },
         {
           "ordinal": 4,
-          "name": "collection_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "content_length",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 6,
           "name": "tags",
           "type_info": "VarcharArray"
         },
         {
+          "ordinal": 5,
+          "name": "size",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 6,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
           "ordinal": 7,
-          "name": "created_by",
+          "name": "mime_type",
           "type_info": "Varchar"
         },
         {
           "ordinal": 8,
-          "name": "modified",
-          "type_info": "Timestamp"
+          "name": "site_name",
+          "type_info": "Varchar"
         },
         {
           "ordinal": 9,
-          "name": "version",
-          "type_info": "Int4"
+          "name": "created_by",
+          "type_info": "Varchar"
         }
       ],
       "parameters": {
@@ -209,13 +243,11 @@
           "Uuid",
           "Varchar",
           "Varchar",
-          "Uuid",
           "Varchar",
-          "Uuid",
-          "Varchar",
-          "VarcharArray",
-          "Text",
           "Int4",
+          "VarcharArray",
+          "Varchar",
+          "Varchar",
           "Varchar",
           "Varchar"
         ]
@@ -223,7 +255,7 @@
       "nullable": [
         false,
         false,
-        true,
+        false,
         false,
         false,
         false,
@@ -252,13 +284,200 @@
       "nullable": []
     }
   },
-  "52f102c11ac6a0997824245db343fe876ba95f66968e66adc704984125205a3a": {
-    "query": "SELECT name FROM file WHERE file_id = $1",
+  "4b48c8864d7f7236e7ef637ccd20566a9a164cfc5bf8c79a341a10af319102eb": {
+    "query": "SELECT file_id, name, original_name, cache_control, size, tags, path, mime_type, site_name, created_by \n      FROM file WHERE site_name = $1 and path = $2",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
+          "name": "file_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
           "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "original_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "size",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 5,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 6,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 8,
+          "name": "site_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 9,
+          "name": "created_by",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "4c2a8e946a76abda421ba9d73f6fbfb0526b1651ddec656baa2f1e7190d1e084": {
+    "query": "SELECT content_id as id, name, content, mime_type, tags, \n        site_name||'/'||collection_name||'/'||name as url\n         FROM content WHERE site_name = $1 AND collection_name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "url",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ]
+    }
+  },
+  "6fb2d568834e8daa5fd73bed64c6f95e0a09e532424f78e4b4bc8509de272414": {
+    "query": "INSERT INTO asset (asset_id, name, file_id, coll_id, coll_name, site_id, site_name)\n       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING asset_id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "asset_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
+  "7e68377779271e25800c5414117f9e8e4316aba50aa0a354aebe9aff5726f705": {
+    "query": "SELECT file_id, name, original_name, cache_control, tags, \n        size, path, mime_type FROM file WHERE file_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "file_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "original_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "size",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 6,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 7,
+          "name": "mime_type",
           "type_info": "Varchar"
         }
       ],
@@ -268,6 +487,13 @@
         ]
       },
       "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
         false
       ]
     }
@@ -344,6 +570,52 @@
         false,
         true,
         true,
+        false
+      ]
+    }
+  },
+  "94c1baaf4dfd4a6ba7054a38d172371fb099972c965f5c90f10cd15346c03c72": {
+    "query": "SELECT  mime_type, tags, content, cache_control, version FROM content WHERE site_name = $1 AND collection_name = $2 AND name = $3",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 1,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 2,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "version",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        true,
+        false,
+        false,
+        false,
         false
       ]
     }
@@ -471,13 +743,13 @@
       ]
     }
   },
-  "a43456a4a0d8dd14a2585eaf0497d4912d08d1d3804357efc5b84402b81a861a": {
-    "query": "UPDATE text SET mime_type = $1, tags = $2, \n                content = $3, content_length = $4,  cache_control = $5, version = $6\n            WHERE site_name = $7 AND collection_name = $8 AND name = $9 \n            RETURNING content_id, name, mime_type, site_id, \n                collection_id, content_length, tags, created_by, modified, version",
+  "ac0de63f92fb41151e660dacc1aeddc1c122afffefddd50132a65e270c8a26dc": {
+    "query": "SELECT asset.asset_id as id, asset.name, \n            file.name as file_name, file.mime_type, file.path, file.size\n        FROM asset \n        INNER JOIN file \n        ON asset.file_id = file.file_id \n        AND asset.coll_name = $1\n        AND asset.site_name = $2",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "content_id",
+          "name": "id",
           "type_info": "Uuid"
         },
         {
@@ -487,63 +759,32 @@
         },
         {
           "ordinal": 2,
-          "name": "mime_type",
+          "name": "file_name",
           "type_info": "Varchar"
         },
         {
           "ordinal": 3,
-          "name": "site_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 4,
-          "name": "collection_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 5,
-          "name": "content_length",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 6,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 7,
-          "name": "created_by",
+          "name": "mime_type",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 8,
-          "name": "modified",
-          "type_info": "Timestamp"
+          "ordinal": 4,
+          "name": "path",
+          "type_info": "Varchar"
         },
         {
-          "ordinal": 9,
-          "name": "version",
+          "ordinal": 5,
+          "name": "size",
           "type_info": "Int4"
         }
       ],
       "parameters": {
         "Left": [
-          "Varchar",
-          "VarcharArray",
-          "Text",
-          "Int4",
-          "Varchar",
-          "Int4",
-          "Text",
           "Text",
           "Text"
         ]
       },
       "nullable": [
-        false,
-        false,
-        true,
-        false,
         false,
         false,
         false,
@@ -574,87 +815,18 @@
       ]
     }
   },
-  "b62ffb89b73e1605314d529f18ee202af427431bf16d7c6b020ca3cb40d2a4f5": {
-    "query": "INSERT INTO file (file_id, name, original_name, cache_control, size, tags, folder, mime_type, site_name, created_by) \n      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) \n        RETURNING file_id, name, original_name,cache_control, tags, size,  folder, mime_type, site_name, created_by",
+  "b2d9d6fe82978248d0661bcf9c2af940ff99f221dc12f84fac38b9330c8b86d6": {
+    "query": "INSERT INTO content_archive \n                (content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, \n                content, content_length, cache_control, version, created_by, created, modified)\n            SELECT \n                content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, \n                content, content_length, cache_control, version, created_by, created, modified\n                from content\n            WHERE \n                site_name = $1 AND collection_name = $2 AND name = $3",
     "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "file_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "original_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "cache_control",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "size",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 6,
-          "name": "folder",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 7,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 8,
-          "name": "site_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 9,
-          "name": "created_by",
-          "type_info": "Varchar"
-        }
-      ],
+      "columns": [],
       "parameters": {
         "Left": [
-          "Uuid",
-          "Varchar",
-          "Varchar",
-          "Varchar",
-          "Int4",
-          "VarcharArray",
-          "Varchar",
-          "Varchar",
-          "Varchar",
-          "Varchar"
+          "Text",
+          "Text",
+          "Text"
         ]
       },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
+      "nullable": []
     }
   },
   "bf8f60302e077230915daba6b3ce1cbff99ee876a78159d0c6e6c9797fd9d00d": {
@@ -739,107 +911,81 @@
       ]
     }
   },
-  "c7c25bd25a0763bf3986f2dbcff32ccf8edc1d395ca1e149f5f13121994557a4": {
-    "query": "SELECT * FROM text WHERE site_name = $1 AND collection_name = $2",
+  "d4f4dc31e652a47eb07c8a04be6a2fb733eabd257753d5ca69eb1c2192234760": {
+    "query": "INSERT INTO content (content_id, name, mime_type, site_id, site_name, \n                collection_id, collection_name, tags, content, \n                content_length, cache_control, created_by)\n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) \n                RETURNING content_id, name, mime_type, site_id, \n                    collection_id, content_length, tags, created_by, modified, version",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "id",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 1,
           "name": "content_id",
           "type_info": "Uuid"
         },
         {
-          "ordinal": 2,
+          "ordinal": 1,
           "name": "name",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 3,
+          "ordinal": 2,
           "name": "mime_type",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 4,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 5,
+          "ordinal": 3,
           "name": "site_id",
           "type_info": "Uuid"
         },
         {
-          "ordinal": 6,
-          "name": "site_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 7,
+          "ordinal": 4,
           "name": "collection_id",
           "type_info": "Uuid"
         },
         {
-          "ordinal": 8,
-          "name": "collection_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 9,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 10,
+          "ordinal": 5,
           "name": "content_length",
           "type_info": "Int4"
         },
         {
-          "ordinal": 11,
-          "name": "cache_control",
-          "type_info": "Varchar"
+          "ordinal": 6,
+          "name": "tags",
+          "type_info": "VarcharArray"
         },
         {
-          "ordinal": 12,
-          "name": "version",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 13,
+          "ordinal": 7,
           "name": "created_by",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 14,
-          "name": "created",
-          "type_info": "Timestamp"
-        },
-        {
-          "ordinal": 15,
+          "ordinal": 8,
           "name": "modified",
           "type_info": "Timestamp"
+        },
+        {
+          "ordinal": 9,
+          "name": "version",
+          "type_info": "Int4"
         }
       ],
       "parameters": {
         "Left": [
+          "Uuid",
+          "Varchar",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "VarcharArray",
           "Text",
-          "Text"
+          "Int4",
+          "Varchar",
+          "Varchar"
         ]
       },
       "nullable": [
         false,
         false,
-        false,
         true,
-        false,
-        false,
-        false,
-        false,
-        false,
         false,
         false,
         false,
@@ -850,47 +996,13 @@
       ]
     }
   },
-  "d984a17ba884dbd784296649249442b4db661f42c748a8316240d0968bf762a5": {
-    "query": "SELECT content, mime_type, cache_control FROM text \n      WHERE site_name = $1 AND collection_name = $2 AND name = $3",
+  "e0ec17517a033c8a43d9d33c2a56e2334563ce4c0617efc23f3f4ebc23860d47": {
+    "query": "UPDATE content SET mime_type = $1, tags = $2, \n                content = $3, content_length = $4,  cache_control = $5, version = $6\n            WHERE site_name = $7 AND collection_name = $8 AND name = $9 \n            RETURNING content_id, name, mime_type, site_id, \n                collection_id, content_length, tags, created_by, modified, version",
     "describe": {
       "columns": [
         {
           "ordinal": 0,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "cache_control",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        false
-      ]
-    }
-  },
-  "de441afd8b14cf95f916d41742ff72a033be5acce262d286a8418994af32df5a": {
-    "query": "SELECT file_id, name, original_name, cache_control, size, tags, folder, mime_type, site_name, created_by \n      FROM file WHERE site_name = $1 and folder = $2",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "file_id",
+          "name": "content_id",
           "type_info": "Uuid"
         },
         {
@@ -900,47 +1012,54 @@
         },
         {
           "ordinal": 2,
-          "name": "original_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "cache_control",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "size",
-          "type_info": "Int4"
-        },
-        {
-          "ordinal": 5,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 6,
-          "name": "folder",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 7,
           "name": "mime_type",
           "type_info": "Varchar"
         },
         {
-          "ordinal": 8,
-          "name": "site_name",
+          "ordinal": 3,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 4,
+          "name": "collection_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 5,
+          "name": "content_length",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 6,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 7,
+          "name": "created_by",
           "type_info": "Varchar"
         },
         {
+          "ordinal": 8,
+          "name": "modified",
+          "type_info": "Timestamp"
+        },
+        {
           "ordinal": 9,
-          "name": "created_by",
-          "type_info": "Varchar"
+          "name": "version",
+          "type_info": "Int4"
         }
       ],
       "parameters": {
         "Left": [
+          "Varchar",
+          "VarcharArray",
+          "Text",
+          "Int4",
+          "Varchar",
+          "Int4",
+          "Text",
           "Text",
           "Text"
         ]
@@ -948,7 +1067,7 @@
       "nullable": [
         false,
         false,
-        false,
+        true,
         false,
         false,
         false,
@@ -957,20 +1076,6 @@
         false,
         false
       ]
-    }
-  },
-  "e6df7d4065922b86ed6f4bd82b6280aca21cd2a913fcba6caca275d458a65210": {
-    "query": "INSERT INTO text_archive \n                (content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, \n                content, content_length, cache_control, version, created_by, created, modified)\n            SELECT \n                content_id, name,  mime_type, tags ,site_id, site_name, collection_id, collection_name, \n                content, content_length, cache_control, version, created_by, created, modified\n                from text \n            WHERE \n                site_name = $1 AND collection_name = $2 AND name = $3",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "e873da84be2cfffedf4ddb53d79af3746a29bb8ed93a46f07506020ac3d38a9a": {
@@ -989,52 +1094,6 @@
         ]
       },
       "nullable": [
-        false
-      ]
-    }
-  },
-  "e8d27bb337101f370ff6ed927bb8803aaa3152ccf1e44a21e1a9bf6ad0d512ac": {
-    "query": "SELECT  mime_type, tags, content, cache_control, version FROM text WHERE site_name = $1 AND collection_name = $2 AND name = $3",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 1,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 2,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "cache_control",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "version",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        true,
-        false,
-        false,
-        false,
         false
       ]
     }

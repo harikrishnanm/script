@@ -17,7 +17,7 @@ async fn get_text(
   Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
   match sqlx::query!(
-    "SELECT content, mime_type, cache_control FROM text 
+    "SELECT content, mime_type, cache_control FROM content
       WHERE site_name = $1 AND collection_name = $2 AND name = $3",
     site_name,
     coll_name,
@@ -78,11 +78,11 @@ async fn save(
 async fn update(
   identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
-  update_text: web::Json<UpdateContent>,
+  update_content: web::Json<UpdateContent>,
   Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
-  debug!("Got request for saving text data");
-  match update_text
+  debug!("Got request for updating content data");
+  match update_content
     .update(
       &identity.into_inner(),
       &data.db_pool,

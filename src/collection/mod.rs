@@ -49,7 +49,7 @@ pub async fn get(
     let content_query_fut = sqlx::query_as!(
         Content,
         "SELECT content_id as id, name, content, mime_type, tags, 
-        site_name||'/'||collection_name||'/'||name as url
+        'site/'||site_name||'/collection/'||collection_name||'/'||name as url
          FROM content WHERE site_name = $1 AND collection_name = $2",
         site_name,
         collection_name

@@ -1,3 +1,4 @@
+use actix_web::web::JsonConfig;
 use actix_web::{
     middleware::{Compress, Condition, Logger},
     web, App, HttpServer,
@@ -5,7 +6,9 @@ use actix_web::{
 use dotenv::dotenv;
 use env_logger::Env;
 use log::{debug, info};
+
 use std::collections::HashMap;
+
 use std::sync::Mutex;
 use std::{io::Error, result::Result};
 
@@ -20,14 +23,18 @@ mod error;
 mod file;
 mod folder;
 mod rbac;
+mod redis;
 mod site;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
+pub type RedisPool = r2d2_redis::r2d2::Pool<r2d2_redis::RedisConnectionManager>;
+pub type RedisConnection = r2d2_redis::r2d2::PooledConnection<r2d2_redis::RedisConnectionManager>;
 
 use crate::rbac::models::*;
 
 pub struct AppData {
     db_pool: DBPool,
+    redis_pool: RedisPool,
     rbac: Mutex<Rbac>,
     rbac_cache: Mutex<HashMap<String, bool>>,
 }
@@ -53,9 +60,13 @@ async fn main() -> Result<(), Error> {
     info!("Reading RBAC");
 
     let rbac_result = rbac::load(&db_pool).await.unwrap();
+    let json_config = JsonConfig::default().limit(128000usize);
+
+    let redis_pool = redis::init();
 
     let app_data = web::Data::new(AppData {
         db_pool: db_pool.clone(),
+        redis_pool: redis_pool,
         rbac: Mutex::new(rbac_result),
         rbac_cache: Mutex::new(HashMap::new()),
     });

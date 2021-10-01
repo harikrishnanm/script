@@ -11,8 +11,8 @@ pub async fn init() -> DBPool {
     let db_url = &env::var("DATABASE_URL").expect("DATABASE_URL should be set");
     trace!("DB URL {}", db_url);
     let pool = match PgPoolOptions::new()
-        .max_connections(5)
-        .min_connections(2)
+        .max_connections(10)
+        .min_connections(3)
         .connect_timeout(Duration::new(5, 0))
         .test_before_acquire(true)
         .connect(db_url)

@@ -109,6 +109,57 @@
       ]
     }
   },
+  "1084b800d9893723a489e21d60b3e2a1f83068b324a2a2dfbae7181afbf66c5d": {
+    "query": "SELECT content_id as id, name, content, mime_type, tags, \n        'site/'||site_name||'/collection/'||collection_name||'/'||name as url\n         FROM content WHERE site_name = $1 AND collection_name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "url",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
+      ]
+    }
+  },
   "1b52d168f3bc2e0b8efeeac4ddcc9f5c1342278d2629351507b4afc78f0cf1f5": {
     "query": "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)\n          VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
     "describe": {
@@ -356,57 +407,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "4c2a8e946a76abda421ba9d73f6fbfb0526b1651ddec656baa2f1e7190d1e084": {
-    "query": "SELECT content_id as id, name, content, mime_type, tags, \n        site_name||'/'||collection_name||'/'||name as url\n         FROM content WHERE site_name = $1 AND collection_name = $2",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "url",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        null
       ]
     }
   },

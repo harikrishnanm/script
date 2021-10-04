@@ -4,7 +4,6 @@ pub mod models;
 use actix_web::{get, http, post, put, web, web::Path, HttpResponse};
 use log::*;
 use r2d2_redis::redis;
-use r2d2_redis::redis::Commands;
 
 use crate::content::models::*;
 use crate::error::ScriptError;
@@ -12,10 +11,11 @@ use crate::rbac::models::Identity;
 use crate::AppData;
 use std::ops::DerefMut;
 
+use crate::common::cache;
 use crate::RedisConnection;
 
 #[get("/site/{site}/collection/{collection}/content/{content_name}")]
-async fn get_text(
+async fn get(
   identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
   Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
@@ -25,53 +25,57 @@ async fn get_text(
   let cache_key = format!("script:{}:{}:{}", site_name, coll_name, content_name);
 
   let mut cache_conn: RedisConnection = data.redis_pool.get().unwrap();
-
-  match redis::cmd("GET")
-    .arg(&cache_key)
-    .query::<String>(cache_conn.deref_mut())
-  {
-    Ok(result) => debug!("Got from redis cache {}", result),
-    Err(e) => error!("Error getting from cache {}", e),
-  }
-
-  match sqlx::query!(
-    "SELECT content, mime_type, cache_control FROM content
-      WHERE site_name = $1 AND collection_name = $2 AND name = $3",
-    site_name,
-    coll_name,
-    content_name
-  )
-  .fetch_one(&data.db_pool)
-  .await
-  {
-    Ok(result) => {
-      let content_str = &result.content;
-      let cache_control: &str = &result.cache_control;
-      let mime_header = match result.mime_type {
-        Some(header) => header,
-        None => "application/octet-stream".to_string(),
-      };
-      let mut builder = HttpResponse::Ok();
-      match redis::cmd("SET")
-        .arg(&cache_key)
-        .arg(content_str)
-        .query::<String>(cache_conn.deref_mut())
-      {
-        Ok(_) => debug!("Added to redis cache"),
-        Err(e) => error!("Error addingh to cache {}", e),
-      }
-      Ok(
-        builder
-          .content_type(mime_header)
-          .header(http::header::CACHE_CONTROL, cache_control)
-          .body(content_str),
+  let content_response = match cache::get::<String>(&data.redis_pool, &cache_key) {
+    Some(val) => {
+      debug!("Got value from redis");
+      trace!("Value: {}", val);
+      serde_json::from_str(&val).unwrap()
+    }
+    None => {
+      debug!("Value not found in redis. Getting data from database");
+      match sqlx::query!(
+        "SELECT content, mime_type, cache_control FROM content
+          WHERE site_name = $1 AND collection_name = $2 AND name = $3",
+        site_name,
+        coll_name,
+        content_name
       )
+      .fetch_one(&data.db_pool)
+      .await
+      {
+        Ok(result) => {
+          let content_str = &result.content;
+          let cache_control: &str = &result.cache_control;
+          let mime_header = match result.mime_type {
+            Some(header) => header,
+            None => "application/octet-stream".to_string(),
+          };
+
+          let content_response = ContentResponse {
+            cache_control: cache_control.to_string(),
+            content_str: content_str.to_string(),
+            mime_type: mime_header.clone(),
+          };
+          let content_response_json = serde_json::to_string(&content_response).unwrap();
+          cache::put::<String>(&data.redis_pool, &cache_key, content_response_json);
+          content_response
+        }
+        Err(e) => {
+          error!("Error getting content {}", e);
+          return Err(ScriptError::FileNotFound);
+        }
+      }
     }
-    Err(e) => {
-      error!("Error getting content {}", e);
-      Err(ScriptError::FileNotFound)
-    }
-  }
+  };
+
+  let mut builder = HttpResponse::Ok();
+
+  Ok(
+    builder
+      .content_type(&content_response.mime_type)
+      .header(http::header::CACHE_CONTROL, content_response.cache_control)
+      .body(content_response.content_str),
+  )
 }
 
 #[post("/site/{site}/collection/{collection}/content")]

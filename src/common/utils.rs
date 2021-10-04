@@ -7,6 +7,10 @@ use log::*;
 
 use crate::file::models::FileDetails;
 
+use crate::common::cache;
+use crate::RedisConnection;
+use crate::RedisPool;
+
 pub fn get_root_path() -> String {
     let root_path = match env::var("FILE_STORE_ROOT") {
         Ok(root) => root,
@@ -18,7 +22,11 @@ pub fn get_root_path() -> String {
     root_path
 }
 
-pub async fn get_file_details(file_id: &Uuid, db_pool: &DBPool) -> Result<FileDetails, Error> {
+pub async fn get_file_details(
+    file_id: &Uuid,
+    db_pool: &DBPool,
+    redis_pool: &RedisPool,
+) -> Result<FileDetails, Error> {
     let file_details: FileDetails = match sqlx::query_as!(
         FileDetails,
         "SELECT file_id, name, original_name, cache_control, tags, 

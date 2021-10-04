@@ -27,7 +27,15 @@ pub struct CollectionResponse {
     pub assets: Vec<Asset>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CachedCollectionResponse {
+    pub name: String,
+    pub cache_control: String,
+    pub contents: Vec<Content>,
+    pub assets: Vec<Asset>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Content {
     pub id: Uuid,
     pub name: String,
@@ -37,7 +45,7 @@ pub struct Content {
     pub url: Option<String>,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Asset {
     pub id: Uuid,
     pub name: String,

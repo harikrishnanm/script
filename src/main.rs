@@ -90,7 +90,7 @@ async fn main() -> Result<(), Error> {
             .service(collection::save)
             .service(collection::get)
             .service(content::save)
-            .service(content::get_text)
+            .service(content::get)
             .service(content::update)
             .service(folder::create_root)
             .service(folder::create)

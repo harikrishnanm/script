@@ -1,6 +1,6 @@
 use crate::collection::models::*;
-use crate::rbac::models::*;
 use crate::constants;
+use crate::rbac::models::*;
 use crate::DBPool;
 use log::*;
 use sqlx::Error;
@@ -62,21 +62,20 @@ impl NewCollection {
                 method: "GET".to_string(),
                 rbac_role: constants::WILDCARD.to_string(),
                 rbac_user: constants::WILDCARD.to_string(),
-                description: Some("Automatically created during creation of collection".to_string()),
-
+                description: Some(
+                    "Automatically created during creation of collection".to_string(),
+                ),
             };
-            match rbac_policy.save(db_pool, &identity).await{
+            match rbac_policy.save(db_pool, &identity).await {
                 Ok(_) => Ok(collection),
                 Err(e) => {
                     error!("Error creating rbac policy for collection {}", e);
                     Err(e)
                 }
             }
-        } else{
+        } else {
             debug!("Not creating rbac since this is a private collection");
             Ok(collection)
         }
-
-
     }
 }

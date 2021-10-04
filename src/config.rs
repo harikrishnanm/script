@@ -37,7 +37,7 @@ pub fn get_server_address() -> SocketAddr {
 }
 
 pub fn get_worker_count() -> usize {
-    let mut workers = 4;
+    let mut workers = 8;
     match env::var("WORKERS") {
         Ok(val) => {
             workers = usize::from_str(&val).unwrap();

@@ -1,39 +1,5 @@
 {
   "db": "PostgreSQL",
-  "049acba93c3cc729222b6208413ddeaadba1454c39032d13db501e40979cad84": {
-    "query": "SELECT content, mime_type, cache_control FROM content\n      WHERE site_name = $1 AND collection_name = $2 AND name = $3",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 1,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "cache_control",
-          "type_info": "Varchar"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        true,
-        false
-      ]
-    }
-  },
   "0756ae4cfc95e84a8739a1c288e2233eeeedf8e30fb50d0478c78cb78890bc34": {
     "query": "UPDATE file SET size = $1 WHERE file_id = $2 RETURNING file_id, name, original_name,cache_control, tags, size,  path, mime_type, site_name, created_by ",
     "describe": {
@@ -106,57 +72,6 @@
         false,
         false,
         false
-      ]
-    }
-  },
-  "1084b800d9893723a489e21d60b3e2a1f83068b324a2a2dfbae7181afbf66c5d": {
-    "query": "SELECT content_id as id, name, content, mime_type, tags, \n        'site/'||site_name||'/collection/'||collection_name||'/'||name as url\n         FROM content WHERE site_name = $1 AND collection_name = $2",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "content",
-          "type_info": "Text"
-        },
-        {
-          "ordinal": 3,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "tags",
-          "type_info": "VarcharArray"
-        },
-        {
-          "ordinal": 5,
-          "name": "url",
-          "type_info": "Text"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        true,
-        false,
-        null
       ]
     }
   },
@@ -314,6 +229,108 @@
         false,
         false,
         false
+      ]
+    }
+  },
+  "243794da572f9197954e1e0baefa7af2179219d520d6ead4fd116f0ef07899ec": {
+    "query": "SELECT asset.asset_id as id, asset.name, \n                    file.name as file_name, file.mime_type, file.path, file.size\n                FROM asset \n                INNER JOIN file \n                ON asset.file_id = file.file_id \n                AND asset.coll_name = $1\n                AND asset.site_name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "file_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "path",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 5,
+          "name": "size",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "340812af8f31f69fb612c30f5685119a69e1ae1d00fa731cb9b624ad9a52cee8": {
+    "query": "SELECT content_id as id, name, content, mime_type, tags, \n                'site/'||site_name||'/collection/'||collection_name||'/'||name as url\n                 FROM content WHERE site_name = $1 AND collection_name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 3,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "tags",
+          "type_info": "VarcharArray"
+        },
+        {
+          "ordinal": 5,
+          "name": "url",
+          "type_info": "Text"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        true,
+        false,
+        null
       ]
     }
   },
@@ -743,57 +760,6 @@
       ]
     }
   },
-  "ac0de63f92fb41151e660dacc1aeddc1c122afffefddd50132a65e270c8a26dc": {
-    "query": "SELECT asset.asset_id as id, asset.name, \n            file.name as file_name, file.mime_type, file.path, file.size\n        FROM asset \n        INNER JOIN file \n        ON asset.file_id = file.file_id \n        AND asset.coll_name = $1\n        AND asset.site_name = $2",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 2,
-          "name": "file_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "mime_type",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "path",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 5,
-          "name": "size",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Text",
-          "Text"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "ac9d3ce5c95bc1be289ac52025a7d280bd5e58a4e307ca421ad8ff30bc219747": {
     "query": "SELECT collection_id FROM collection where site_name = $1 and name = $2",
     "describe": {
@@ -845,6 +811,40 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "bf964379aecc239cad1697592f539504f2547a25663c36e2290a283619f01132": {
+    "query": "SELECT content, mime_type, cache_control FROM content\n          WHERE site_name = $1 AND collection_name = $2 AND name = $3",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
         false
       ]
     }

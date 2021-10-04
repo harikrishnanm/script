@@ -13,7 +13,7 @@ impl NewFolder {
       Ok(root) => root,
       Err(e) => {
         error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./file_store");
-        "/file_store".to_string()
+        "./file_store".to_string()
       }
     };
 
@@ -21,7 +21,7 @@ impl NewFolder {
 
     let parent_path = Path::new(&folder_path_str);
 
-    debug!("Creating path");
+    debug!("Creating path {}", folder_path_str);
     match DirBuilder::new().recursive(true).create(parent_path) {
       Ok(_) => {
         debug!("Created folder");

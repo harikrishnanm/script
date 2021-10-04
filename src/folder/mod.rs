@@ -31,6 +31,7 @@ pub async fn get(
   data: Data<AppData>,
   Path((site_name, folder)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
+  debug!("Getting folder listing for {}", folder);
   let root_path = utils::get_root_path();
 
   let base_path = format!("{}/{}", root_path, site_name);
@@ -46,6 +47,7 @@ pub async fn get_root(
   data: Data<AppData>,
   Path(site_name): Path<String>,
 ) -> Result<HttpResponse, ScriptError> {
+  debug!("Getting folder listing for root");
   let root_path = utils::get_root_path();
 
   let base_path = format!("{}/{}", root_path, site_name);
@@ -56,6 +58,7 @@ pub async fn get_root(
 }
 
 fn get_folder_entries(base_path: &str, folder: Option<&str>) -> FolderListing {
+  debug!("Getting folder listing of {}", base_path);
   let full_path = match folder {
     Some(f) => format!("{}/{}", base_path, f),
     None => base_path.to_string(),

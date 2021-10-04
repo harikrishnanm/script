@@ -9,7 +9,7 @@ use actix_web::{
 
 use log::*;
 
-use crate::common::utils;
+use crate::common::cache;
 
 use crate::asset::models::*;
 use crate::error::ScriptError;
@@ -30,7 +30,11 @@ async fn save(
     .save(&identity, db_pool, &site_name, &coll_name)
     .await
   {
-    Ok(_) => Ok(HttpResponse::Created().finish()),
+    Ok(_) => {
+      let coll_cache_key = format!("script:{}:{}", site_name, coll_name);
+      cache::delete(&data.redis_pool, &coll_cache_key);
+      Ok(HttpResponse::Created().finish())
+    }
     Err(e) => {
       error!("Error creating asset {}", e);
       return Err(ScriptError::AssetCreationError);

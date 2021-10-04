@@ -7,8 +7,6 @@ use log::*;
 
 use crate::file::models::FileDetails;
 
-use crate::common::cache;
-use crate::RedisConnection;
 use crate::RedisPool;
 
 pub fn get_root_path() -> String {
@@ -16,7 +14,7 @@ pub fn get_root_path() -> String {
         Ok(root) => root,
         Err(e) => {
             error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./file_store");
-            "/file_store".to_string()
+            "./file_store".to_string()
         }
     };
     root_path

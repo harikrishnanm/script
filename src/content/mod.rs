@@ -95,7 +95,11 @@ async fn save(
     )
     .await
   {
-    Ok(text) => Ok(HttpResponse::Created().json(text)),
+    Ok(text) => {
+      let coll_cache_key = format!("script:{}:{}", site_name, coll_name);
+      cache::delete(&data.redis_pool, &coll_cache_key);
+      Ok(HttpResponse::Created().json(text))
+    }
     Err(e) => {
       error!("Error saving content text {}", e);
       Err(ScriptError::ContentCreationFailure)
@@ -110,7 +114,11 @@ async fn update(
   update_content: web::Json<UpdateContent>,
   Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
-  debug!("Got request for updating content data");
+  info!(
+    "Got request for updating collection content for {}",
+    coll_name
+  );
+  debug!("Adding new content to collection {:?}", update_content);
   match update_content
     .update(
       &identity.into_inner(),
@@ -121,7 +129,14 @@ async fn update(
     )
     .await
   {
-    Ok(text) => Ok(HttpResponse::Created().json(text)),
+    Ok(text) => {
+      debug!("Updated content. Now removing entries from cache(s)");
+      let content_cache_key = format!("script:{}:{}:{}", site_name, coll_name, content_name);
+      let coll_cache_key = format!("script:{}:{}", site_name, coll_name);
+      cache::delete(&data.redis_pool, &content_cache_key);
+      cache::delete(&data.redis_pool, &coll_cache_key);
+      Ok(HttpResponse::Created().json(text))
+    }
     Err(e) => {
       error!("Error saving content text {}", e);
       Err(ScriptError::ContentCreationFailure)

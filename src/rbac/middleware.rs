@@ -83,7 +83,7 @@ where
 
         let identity = match utils::check_token(&req) {
             Err(auth_error) => {
-                error!("Authentication error {:?}", auth_error);
+                error!("Authentication token error {:?}", auth_error);
                 let u: actix_web::HttpResponse<B> =
                     HttpResponse::Unauthorized().json(auth_error).into_body();
                 return Either::Right(ok(req.into_response(u)));

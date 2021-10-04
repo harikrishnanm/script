@@ -46,7 +46,7 @@ async fn get_file(
 
     //TODO Content dispositon
 }
-#[get("/site/{site_name}/foldker/{folder:.*}")]
+#[get("/site/{site_name}/folder/{folder:.*}")]
 async fn list(
     data: web::Data<AppData>,
     Path((site_name, folder)): Path<(String, String)>,

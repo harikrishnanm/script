@@ -27,3 +27,14 @@ pub fn get<T: FromRedisValue>(cache_pool: &RedisPool, cache_key: &str) -> Option
     Err(e) => None,
   }
 }
+
+pub fn delete(cache_pool: &RedisPool, cache_key: &str) {
+  let mut cache_conn: RedisConnection = cache_pool.get().unwrap();
+  match redis::cmd("DEL")
+    .arg(cache_key)
+    .query::<i32>(cache_conn.deref_mut())
+  {
+    Ok(_) => debug!("Cleared cache"),
+    Err(e) => error!("Error clearing cache {}", e),
+  }
+}

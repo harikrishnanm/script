@@ -1,7 +1,6 @@
 use chrono::NaiveDateTime;
-
 use serde::{Deserialize, Serialize};
-
+use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -9,8 +8,15 @@ pub struct NewContent {
     pub name: String,
     pub mime_type: Option<String>,
     pub tags: Vec<String>,
-    pub content: String,
+    pub content: Value,
+    pub raw: Option<bool>,
     pub cache_control: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RawContent {
+    pub content_item_raw_id: Uuid,
+    pub content: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -46,13 +52,3 @@ pub struct ContentSet {
     pub keys: Vec<String>,
     pub values: Vec<String>,
 }
-
-/*impl ToRedisArgs for ContentResponse {
-    fn write_redis_args<W>(&self, out: &mut W)
-    where
-        W: ?Sized + RedisWrite,
-    {
-        let redis_val = serde_json::to_string(self).unwrap();
-        out.write_arg(redis_val.as_bytes());
-    }
-}*/

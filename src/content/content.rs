@@ -6,6 +6,11 @@ use log::*;
 use sqlx::Error;
 use uuid::Uuid;
 
+
+fn test(){
+    debug!("Test fn");
+}
+
 impl NewContent{
     pub async fn save(
         self: &Self,
@@ -24,8 +29,20 @@ impl NewContent{
             }
         };
 
+        let mut tx = match db_pool.begin().await {
+            Ok(tx) => tx,
+            Err(e) => {
+                error!("Could not start update transaction");
+                return Err(e);
+            }
+        };
+
+
         let mut updated_tags = self.tags.clone();
         updated_tags.push(self.name.clone());
+
+       test();
+
 
         match sqlx::query_as!(
             Content,
@@ -54,7 +71,7 @@ impl NewContent{
             },
             identity.user
         )
-        .fetch_one(db_pool)
+        .fetch_one(&mut tx)
         .await
         {
             Ok(text) => Ok(text),

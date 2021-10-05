@@ -75,6 +75,27 @@
       ]
     }
   },
+  "0f47e9e20045698aff6b12306e8425a5856add07391ba308d9968f952c2e5cdb": {
+    "query": "SELECT taxonomy_id FROM taxonomy WHERE name = $1 and site_name = $2",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false
+      ]
+    }
+  },
   "1b52d168f3bc2e0b8efeeac4ddcc9f5c1342278d2629351507b4afc78f0cf1f5": {
     "query": "INSERT INTO site (site_id, name, path, slug, url, cors_enabled, created_by)\n          VALUES ($1, $2, $3, $4, $5, $6, $7)\n            RETURNING site_id, name, path, slug, url, cors_enabled, created_by, created, modified",
     "describe": {
@@ -143,6 +164,47 @@
         true,
         true,
         true,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "1fba28e1737dc09bd7ab97a1a76099d46a9138df8e463be40dba04d495230b1f": {
+    "query": "INSERT INTO taxonomy (taxonomy_id, name, site_id, site_name) \n      VALUES ($1, $2, $3, $4) RETURNING taxonomy_id, name, site_id, site_name",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "site_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 3,
+          "name": "site_name",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar"
+        ]
+      },
+      "nullable": [
+        false,
         false,
         false,
         false
@@ -911,6 +973,54 @@
       ]
     }
   },
+  "c8f0b30c17b278433644fd0d721c8d26efe626361a3d7dc929294edf3472bfce": {
+    "query": "INSERT INTO taxonomy_item (taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal) \n    VALUES ($1, $2, $3, $4, $5)\n    RETURNING taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_item_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "item_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_type",
+          "type_info": "Bpchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "ordinal",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Bpchar",
+          "Int4"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
   "d4f4dc31e652a47eb07c8a04be6a2fb733eabd257753d5ca69eb1c2192234760": {
     "query": "INSERT INTO content (content_id, name, mime_type, site_id, site_name, \n                collection_id, collection_name, tags, content, \n                content_length, cache_control, created_by)\n                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) \n                RETURNING content_id, name, mime_type, site_id, \n                    collection_id, content_length, tags, created_by, modified, version",
     "describe": {
@@ -1070,6 +1180,50 @@
         true,
         false,
         false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ]
+    }
+  },
+  "e3fdf720badcd30189b8f052e91650dbac2d7c3c232fbd9762a9a220e2c97d22": {
+    "query": "SELECT taxonomy_id, taxonomy_item_id, taxonomy_item.item_name, \n      item_type, ordinal \n      FROM taxonomy_item\n      WHERE taxonomy_id = $1\n      ORDER BY ordinal ASC",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "taxonomy_item_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "item_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_type",
+          "type_info": "Bpchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "ordinal",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
         false,
         false,
         false,

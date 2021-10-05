@@ -25,7 +25,7 @@ debug!("Create folder {}", &folder_name);
         .unwrap();
         */
 
-#[get("/site/{site_name}/folder/{folder:.*}")]
+#[get("/site/{site_name}/folders/{folder:.*}")]
 pub async fn get(
   identity: ReqData<Identity>,
   data: Data<AppData>,
@@ -41,7 +41,7 @@ pub async fn get(
   Ok(HttpResponse::Ok().json(listing))
 }
 
-#[get("/site/{site_name}/folder")]
+#[get("/site/{site_name}/folders")]
 pub async fn get_root(
   identity: ReqData<Identity>,
   data: Data<AppData>,

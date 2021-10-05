@@ -20,6 +20,30 @@ pub fn get_root_path() -> String {
     root_path
 }
 
+pub async fn get_taxonomy_id(
+    taxonomy_name: &str,
+    site_name: &str,
+    db_pool: &DBPool,
+) -> Result<Uuid, Error> {
+    debug!("Getting taxonomy_id for {}/{}", site_name, taxonomy_name);
+
+    let taxonomy_id: Uuid = match sqlx::query!(
+        "SELECT taxonomy_id FROM taxonomy WHERE name = $1 and site_name = $2",
+        taxonomy_name,
+        site_name
+    )
+    .fetch_one(db_pool)
+    .await
+    {
+        Ok(taxonomy) => taxonomy.taxonomy_id,
+        Err(e) => {
+            error!("Error getting taxonomy id {}", e);
+            return Err(e);
+        }
+    };
+    Ok(taxonomy_id)
+}
+
 pub async fn get_file_details(
     file_id: &Uuid,
     db_pool: &DBPool,

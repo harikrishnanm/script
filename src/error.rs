@@ -21,6 +21,8 @@ pub enum ScriptError {
     AssetCreationError,
     #[display(fmt = "This request cannot be processed. {}", _0)]
     BadRequest(String),
+    #[display(fmt = "Unexpexted Error")]
+    UnexpectedError,
 }
 
 #[derive(Serialize)]
@@ -55,6 +57,7 @@ impl ResponseError for ScriptError {
             ScriptError::FolderCreationError => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::FileCreationError => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::AssetCreationError => StatusCode::INTERNAL_SERVER_ERROR,
+            ScriptError::UnexpectedError => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

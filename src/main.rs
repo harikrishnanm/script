@@ -25,6 +25,7 @@ mod folder;
 mod rbac;
 mod redis;
 mod site;
+mod taxonomy;
 
 pub type DBPool = sqlx::Pool<sqlx::Postgres>;
 pub type RedisPool = r2d2_redis::r2d2::Pool<r2d2_redis::RedisConnectionManager>;
@@ -97,6 +98,9 @@ async fn main() -> Result<(), Error> {
             .service(folder::get)
             .service(folder::get_root)
             .service(asset::save)
+            .service(taxonomy::save)
+            .service(taxonomy::save_item)
+            .service(taxonomy::get)
     })
     .workers(workers)
     .bind(addr)?

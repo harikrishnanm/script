@@ -1,0 +1,47 @@
+CREATE TABLE content_set (
+  id SERIAL PRIMARY KEY,
+  content_set_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
+  name VARCHAR(50) NOT NULL,
+  site_id UUID NOT NULL,
+  site_name VARCHAR(50) NOT NULL,
+  version INTEGER NOT NULL DEFAULT 0,
+  created_by VARCHAR(50) NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT current_timestamp,
+  modified TIMESTAMP NOT NULL DEFAULT current_timestamp
+);
+
+CREATE TABLE content_set_item (
+  id SERIAL PRIMARY KEY,
+  content_set_item_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
+  content_set_id UUID NOT NULL
+);
+
+CREATE TABLE content_item (
+  id SERIAL PRIMARY KEY,
+  content_item_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
+  name VARCHAR(50) NOT NULL,
+  content_set_item_id UUID NOT NULL,
+  parent_id UUID,
+  type VARCHAR(20) NOT NULL,
+  value_id UUID NOT NULL,
+  CONSTRAINT content_set_item_id_fk FOREIGN KEY (taxonomy_id) REFERENCES taxonomy(taxonomy_id) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT content_set_parent_fk FOREIGN KEY (parent_id) REFERENCES content_set(content_set_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE text_item (
+  id SERIAL PRIMARY KEY, 
+  text_item_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
+  value TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE bool_item (
+  id SERIAL PRIMARY KEY,
+  bool_item_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
+  value BOOL NOT NULL DEFAULT false
+);
+
+CREATE TABLE number_item (
+  id SERIAL PRIMARY KEY,
+  number_item_id UUID NOT NULL UNIQUE DEFAULT uuid_generate_v4 (),
+  value NUMERIC NOT NULL DEFAULT 0
+);

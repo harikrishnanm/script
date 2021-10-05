@@ -42,6 +42,11 @@ pub struct ContentResponse {
     pub mime_type: String,
 }
 
+pub struct ContentSet {
+    pub keys: Vec<String>,
+    pub values: Vec<String>,
+}
+
 /*impl ToRedisArgs for ContentResponse {
     fn write_redis_args<W>(&self, out: &mut W)
     where

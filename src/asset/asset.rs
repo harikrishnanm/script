@@ -10,14 +10,14 @@ use crate::common::utils;
 impl NewAsset {
   pub async fn save(
     self: &Self,
-    identity: &Identity,
+    _identity: &Identity,
     db_pool: &DBPool,
     site_name: &str,
     coll_name: &str,
   ) -> Result<(), Error> {
     debug!("Saving new asset at {}/{}", site_name, coll_name);
     let asset_id = Uuid::new_v4();
-    let coll_id = match utils::get_collection_id(site_name, coll_name, db_pool).await {
+    let _coll_id = match utils::get_collection_id(site_name, coll_name, db_pool).await {
       Ok(coll_id) => coll_id,
       Err(e) => {
         error!(

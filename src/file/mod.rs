@@ -21,7 +21,7 @@ use crate::constants::*;
 
 #[get("/site/{site_name}/file/{file:.*}")]
 async fn get_file(
-    data: web::Data<AppData>,
+    _data: web::Data<AppData>,
     Path((site_name, file)): Path<(String, String)>,
 ) -> Result<NamedFile, ScriptError> {
     debug!("Request file {}", file);

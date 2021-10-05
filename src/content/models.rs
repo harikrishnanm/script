@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use r2d2_redis::redis::{RedisWrite, ToRedisArgs};
+
 use serde::{Deserialize, Serialize};
 
 use uuid::Uuid;

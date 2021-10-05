@@ -24,7 +24,7 @@ pub fn get<T: FromRedisValue>(cache_pool: &RedisPool, cache_key: &str) -> Option
     .query::<T>(cache_conn.deref_mut())
   {
     Ok(result) => Some(result),
-    Err(e) => None,
+    Err(_e) => None,
   }
 }
 

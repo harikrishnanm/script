@@ -45,7 +45,7 @@ impl NewTaxonomyItem {
     taxonomy_name: &str,
   ) -> Result<TaxonomyItem, Error> {
     let taxonomy_item_id = Uuid::new_v4();
-    let site_id = utils::get_site_id(site_name, db_pool).await.unwrap();
+    let _site_id = utils::get_site_id(site_name, db_pool).await.unwrap();
     let taxonomy_id = utils::get_taxonomy_id(taxonomy_name, site_name, db_pool)
       .await
       .unwrap();

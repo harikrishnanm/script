@@ -62,7 +62,7 @@ async fn main() -> Result<(), Error> {
     info!("Reading RBAC");
 
     let rbac_result = rbac::load(&db_pool).await.unwrap();
-    let json_config = JsonConfig::default().limit(128000usize);
+    let _json_config = JsonConfig::default().limit(128000usize);
 
     let redis_pool = redis::init();
 

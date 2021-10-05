@@ -59,7 +59,7 @@ where
         let is_public_path = match &req.app_data::<Data<AppData>>() {
             Some(app_data) => match &app_data.rbac.lock() {
                 Ok(rbac) => rbac.pub_paths_regex_set.is_match(&path),
-                Err(e) => {
+                Err(_e) => {
                     error!("Error getting lock on rbac policy");
                     false
                 }

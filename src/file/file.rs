@@ -7,7 +7,7 @@ use sqlx::Error;
 impl File {
   pub async fn update_size(
     self: &Self,
-    identity: Identity,
+    _identity: Identity,
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
   ) -> Result<File, Error> {
     match sqlx::query_as!(

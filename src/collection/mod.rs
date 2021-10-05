@@ -25,7 +25,7 @@ pub async fn get(
     );
 
     let cache_key = format!("script:{}:{}", site_name, collection_name);
-    let mut cache_conn: RedisConnection = data.redis_pool.get().unwrap();
+    let _cache_conn: RedisConnection = data.redis_pool.get().unwrap();
 
     let mut cache_control = String::new();
 
@@ -56,8 +56,8 @@ pub async fn get(
                 }
             };
             //Get content and assets
-            let mut contents: Vec<Content> = Vec::new();
-            let mut assets: Vec<Asset> = Vec::new();
+            let _contents: Vec<Content> = Vec::new();
+            let _assets: Vec<Asset> = Vec::new();
 
             let content_query_fut = sqlx::query_as!(
                 Content,

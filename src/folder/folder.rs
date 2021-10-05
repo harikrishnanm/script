@@ -11,7 +11,7 @@ impl NewFolder {
 
     let root_path = match env::var("FILE_STORE_ROOT") {
       Ok(root) => root,
-      Err(e) => {
+      Err(_e) => {
         error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./file_store");
         "./file_store".to_string()
       }

@@ -12,7 +12,7 @@ use crate::RedisPool;
 pub fn get_root_path() -> String {
     let root_path = match env::var("FILE_STORE_ROOT") {
         Ok(root) => root,
-        Err(e) => {
+        Err(_e) => {
             error!("Cannot read FILE_STORE_ROOT env variable. Will use default ./file_store");
             "./file_store".to_string()
         }
@@ -47,7 +47,7 @@ pub async fn get_taxonomy_id(
 pub async fn get_file_details(
     file_id: &Uuid,
     db_pool: &DBPool,
-    redis_pool: &RedisPool,
+    _redis_pool: &RedisPool,
 ) -> Result<FileDetails, Error> {
     let file_details: FileDetails = match sqlx::query_as!(
         FileDetails,

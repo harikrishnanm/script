@@ -7,7 +7,7 @@ use std::ops::DerefMut;
 
 pub fn init() -> RedisPool {
   info!("Initializing redis pool");
-  let redis_url = match env::var("REDIS_URL") {
+  let _redis_url = match env::var("REDIS_URL") {
     Ok(url) => url,
     Err(_e) => "redis://localhost".to_string(),
   };

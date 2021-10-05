@@ -14,7 +14,7 @@ use crate::RedisConnection;
 
 #[get("/site/{site}/collection/{collection}/content/{content_name}")]
 async fn get(
-  identity: web::ReqData<Identity>,
+  _identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
   Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
@@ -22,7 +22,7 @@ async fn get(
 
   let cache_key = format!("script:{}:{}:{}", site_name, coll_name, content_name);
 
-  let mut cache_conn: RedisConnection = data.redis_pool.get().unwrap();
+  let _cache_conn: RedisConnection = data.redis_pool.get().unwrap();
   let content_response = match cache::get::<String>(&data.redis_pool, &cache_key) {
     Some(val) => {
       debug!("Got value from redis");

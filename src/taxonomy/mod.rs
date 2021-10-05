@@ -12,7 +12,7 @@ use log::*;
 
 #[get("/site/{site_name}/taxonomy/{taxonomy_name}")]
 pub async fn get(
-  identity: web::ReqData<Identity>,
+  _identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
   Path((site_name, taxonomy_name)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
@@ -20,13 +20,13 @@ pub async fn get(
 
   match get_taxonomy(db_pool, &taxonomy_name, &site_name).await {
     Ok(result) => Ok(HttpResponse::Ok().json(result)),
-    Err(e) => Err(ScriptError::UnexpectedError),
+    Err(_e) => Err(ScriptError::UnexpectedError),
   }
 }
 
 #[get("/site/{site_name}/taxonomy")]
 pub async fn list(
-  identity: web::ReqData<Identity>,
+  _identity: web::ReqData<Identity>,
   data: web::Data<AppData>,
   Path(site_name): Path<String>,
 ) -> Result<HttpResponse, ScriptError> {
@@ -34,7 +34,7 @@ pub async fn list(
 
   match get_taxonomy_list(db_pool, &site_name).await {
     Ok(result) => Ok(HttpResponse::Ok().json(result)),
-    Err(e) => Err(ScriptError::UnexpectedError),
+    Err(_e) => Err(ScriptError::UnexpectedError),
   }
 }
 
@@ -52,7 +52,7 @@ pub async fn save(
 
   match new_taxonomy.save(db_pool, &site_name).await {
     Ok(taxonomy) => Ok(HttpResponse::Created().json(taxonomy)),
-    Err(e) => Err(ScriptError::UnexpectedError),
+    Err(_e) => Err(ScriptError::UnexpectedError),
   }
 }
 
@@ -76,7 +76,7 @@ pub async fn save_item(
     .await
   {
     Ok(taxonomy_item) => Ok(HttpResponse::Created().json(taxonomy_item)),
-    Err(e) => Err(ScriptError::UnexpectedError),
+    Err(_e) => Err(ScriptError::UnexpectedError),
   }
 }
 
@@ -95,7 +95,7 @@ pub async fn get_taxonomy_list(
   .await
   {
     Ok(result) => Ok(result),
-    Err(e) => Err(ScriptError::UnexpectedError),
+    Err(_e) => Err(ScriptError::UnexpectedError),
   }
 }
 
@@ -123,6 +123,6 @@ pub async fn get_taxonomy(
   .await
   {
     Ok(result) => Ok(result),
-    Err(e) => Err(ScriptError::UnexpectedError),
+    Err(_e) => Err(ScriptError::UnexpectedError),
   }
 }

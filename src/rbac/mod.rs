@@ -39,9 +39,9 @@ pub async fn reload_rbac(data: &AppData) -> Result<(), Error> {
 
 #[get("/admin/rbac/{rbac_id}")]
 pub async fn get_rbac_by_id(
-    identity: ReqData<Identity>,
-    data: Data<AppData>,
-    Path(rbac_id): Path<Uuid>,
+    _identity: ReqData<Identity>,
+    _data: Data<AppData>,
+    Path(_rbac_id): Path<Uuid>,
 ) -> HttpResponse {
     HttpResponse::Ok().finish()
 }

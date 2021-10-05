@@ -396,6 +396,32 @@
       ]
     }
   },
+  "3a9333d63c77940da927856f6e406cab9c46cac220f58b873b934f5bcbf273c8": {
+    "query": "SELECT taxonomy_id, name FROM taxonomy WHERE site_name =$1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "name",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        false
+      ]
+    }
+  },
   "49a7f8488767ffef12c3ae7ea276314e3666809030e66a8f64977e271f78cedb": {
     "query": "INSERT INTO rbac(path, path_match, method, rbac_role, rbac_user, description, created_by)\n        VALUES ($1, $2, $3, $4, $5, $6, $7)",
     "describe": {

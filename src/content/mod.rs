@@ -3,13 +3,11 @@ pub mod models;
 
 use actix_web::{get, http, post, put, web, web::Path, HttpResponse};
 use log::*;
-use r2d2_redis::redis;
 
 use crate::content::models::*;
 use crate::error::ScriptError;
 use crate::rbac::models::Identity;
 use crate::AppData;
-use std::ops::DerefMut;
 
 use crate::common::cache;
 use crate::RedisConnection;

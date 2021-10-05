@@ -24,6 +24,20 @@ pub async fn get(
   }
 }
 
+#[get("/site/{site_name}/taxonomy")]
+pub async fn list(
+  identity: web::ReqData<Identity>,
+  data: web::Data<AppData>,
+  Path(site_name): Path<String>,
+) -> Result<HttpResponse, ScriptError> {
+  let db_pool = &data.db_pool;
+
+  match get_taxonomy_list(db_pool, &site_name).await {
+    Ok(result) => Ok(HttpResponse::Ok().json(result)),
+    Err(e) => Err(ScriptError::UnexpectedError),
+  }
+}
+
 #[post("/site/{site_name}/taxonomy")]
 pub async fn save(
   identity: web::ReqData<Identity>,
@@ -62,6 +76,25 @@ pub async fn save_item(
     .await
   {
     Ok(taxonomy_item) => Ok(HttpResponse::Created().json(taxonomy_item)),
+    Err(e) => Err(ScriptError::UnexpectedError),
+  }
+}
+
+pub async fn get_taxonomy_list(
+  db_pool: &DBPool,
+  site_name: &str,
+) -> Result<Vec<TaxonomyListItem>, ScriptError> {
+  debug!("Getting list of taxonomies for {} ", site_name);
+
+  match sqlx::query_as!(
+    TaxonomyListItem,
+    "SELECT taxonomy_id, name FROM taxonomy WHERE site_name =$1",
+    site_name
+  )
+  .fetch_all(db_pool)
+  .await
+  {
+    Ok(result) => Ok(result),
     Err(e) => Err(ScriptError::UnexpectedError),
   }
 }

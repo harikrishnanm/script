@@ -28,3 +28,9 @@ pub struct NewTaxonomyItem {
   pub item_type: String,
   pub ordinal: i32,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TaxonomyListItem {
+  pub taxonomy_id: Uuid,
+  pub name: String,
+}

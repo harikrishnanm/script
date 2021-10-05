@@ -24,6 +24,7 @@ mod file;
 mod folder;
 mod rbac;
 mod redis;
+mod scontent;
 mod site;
 mod taxonomy;
 
@@ -101,6 +102,9 @@ async fn main() -> Result<(), Error> {
             .service(taxonomy::save)
             .service(taxonomy::save_item)
             .service(taxonomy::get)
+            .service(taxonomy::list)
+            .service(scontent::get)
+            .service(scontent::save)
     })
     .workers(workers)
     .bind(addr)?

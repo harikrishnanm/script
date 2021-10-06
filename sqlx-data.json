@@ -294,6 +294,29 @@
       ]
     }
   },
+  "269e1578320f1808c053d8dd0218f0b3dfc8234b90009a3ddd8e078caeb5515c": {
+    "query": "INSERT INTO content \n            (content_id, name, tags, site_id, site_name, collection_id, collection_name, \n                content_item_id, raw, taxonomy_id, cache_control, created_by ) \n            VALUES \n            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "VarcharArray",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Bool",
+          "Uuid",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "3a9333d63c77940da927856f6e406cab9c46cac220f58b873b934f5bcbf273c8": {
     "query": "SELECT taxonomy_id, name FROM taxonomy WHERE site_name =$1",
     "describe": {
@@ -864,29 +887,6 @@
       ]
     }
   },
-  "c9888548af7f0fac4ffc36d6c4777490584ad703fd9b70874db6de477abd09c1": {
-    "query": "INSERT INTO content \n            (content_id, name, tags, site_id, site_name, collection_id, collection_name, content_item_id, raw, taxonomy_id, cache_control, created_by ) \n            VALUES \n            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "VarcharArray",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Bool",
-          "Uuid",
-          "Varchar",
-          "Varchar"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "e3fdf720badcd30189b8f052e91650dbac2d7c3c232fbd9762a9a220e2c97d22": {
     "query": "SELECT taxonomy_id, taxonomy_item_id, taxonomy_item.item_name, \n      item_type, ordinal \n      FROM taxonomy_item\n      WHERE taxonomy_id = $1\n      ORDER BY ordinal ASC",
     "describe": {
@@ -947,6 +947,50 @@
         ]
       },
       "nullable": [
+        false
+      ]
+    }
+  },
+  "eda28838828bb31f124cb436e6bf3f202caad22e63047c3e347a5526926ae6c7": {
+    "query": "SELECT taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal FROM taxonomy_item WHERE taxonomy_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_item_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "item_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_type",
+          "type_info": "Bpchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "ordinal",
+          "type_info": "Int4"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
         false
       ]
     }

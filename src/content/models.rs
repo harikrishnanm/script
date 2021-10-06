@@ -14,6 +14,10 @@ pub struct NewContent {
     pub taxonomy_id: Option<Uuid>
 }
 
+
+
+
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RawContent {
     pub content_item_raw_id: Uuid,

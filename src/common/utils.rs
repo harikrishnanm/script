@@ -1,4 +1,5 @@
-use crate::DBPool;
+use crate::taxonomy::models::TaxonomyItem;
+use crate::{DBPool, taxonomy};
 use sqlx::Error;
 use std::env;
 use uuid::Uuid;
@@ -124,4 +125,19 @@ pub async fn get_site_and_coll_id(
     };
 
     Ok((site_id, coll_id))
+}
+
+pub async fn get_taxonomy_items(taxonomy_id: Uuid, db_pool: &DBPool) -> Result<Vec<TaxonomyItem>, Error>{
+   match sqlx::query_as!( TaxonomyItem,
+        "SELECT taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal FROM taxonomy_item WHERE taxonomy_id = $1", 
+        taxonomy_id)
+        .fetch_all(db_pool).await {
+            Ok(res) => Ok(res),
+            Err(e) => Err(e)
+    }
+}
+
+pub fn do_vecs_match<T: PartialEq>(a: &Vec<&T>, b: &Vec<&T>) -> bool {
+    let matching = a.iter().zip(b.iter()).filter(|&(a, b)| a == b).count();
+    matching == a.len() && matching == b.len()
 }

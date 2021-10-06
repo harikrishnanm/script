@@ -1,9 +1,10 @@
 use crate::{error::ScriptError, rbac::models::Identity};
 use crate::content::models::*;
-use crate::DBPool;
+use crate::{DBPool, taxonomy};
 use crate::common::utils;
 use log::*;
-use serde_json::Value;
+use crate::taxonomy::models::TaxonomyItem;
+use serde_json::{Value, Map};
 use sqlx::{Error, Transaction, Postgres};
 use uuid::Uuid;
 
@@ -46,8 +47,8 @@ impl NewContent{
 
         let mut updated_tags = self.tags.clone();
         updated_tags.push(self.name.clone());
-        match &self.raw {
-            true => {
+        match &self.taxonomy_id {
+            None => {
                 debug!("Raw content recieved");
                 let content_str = match &self.content {
                     Value::String(val) => val,
@@ -55,24 +56,37 @@ impl NewContent{
                 };
                 let content_item_raw_id = Uuid::new_v4();
                 match sqlx::query!(
-                    "INSERT INTO content_item_raw (content_item_raw_id, content) VALUES ($1, $2)", 
-                    content_item_raw_id,
-                    content_str,)
-                    .execute(&mut tx)
-                    .await {
-                        Ok(_) => {
-                            debug!("Content item created");
-
-                        },
-                        Err(e) => {
-                            error!("Error creating content_item ");
-                            tx.rollback().await?;
-                            return Err(e);
-                        }
+                "INSERT INTO content_item_raw (content_item_raw_id, content) VALUES ($1, $2)", 
+                content_item_raw_id,
+                content_str,)
+                .execute(&mut tx)
+                .await {
+                    Ok(_) => {
+                        debug!("Content item created");
+                    },
+                    Err(e) => {
+                        error!("Error creating content_item ");
+                        tx.rollback().await?;
+                        return Err(e);
                     }
+                }
             },
-            false => {
-                return Ok(());            
+            Some(taxonomy_id) => {
+                debug!("Structured content recieved. getting taxonomy");
+                match &self.content {
+                    Value::Object(content_obj) => {
+                        
+        
+                    },
+                    _ => {
+                        error!("Cannot save content since its not an object")
+                    }
+                }
+                
+
+                return Ok(());   
+                
+         
             }
         }
 
@@ -86,7 +100,8 @@ impl NewContent{
 
         match sqlx::query!(
             "INSERT INTO content 
-            (content_id, name, tags, site_id, site_name, collection_id, collection_name, content_item_id, raw, taxonomy_id, cache_control, created_by ) 
+            (content_id, name, tags, site_id, site_name, collection_id, collection_name, 
+                content_item_id, raw, taxonomy_id, cache_control, created_by ) 
             VALUES 
             ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
         content_id, 
@@ -105,41 +120,31 @@ impl NewContent{
             Ok(_) => Ok(()),
             Err(e) => Err(e)
         }
+    }
+
+    async fn check_taxonomy (db_pool: &DBPool, taxonomy_id: Uuid, content_map: Map<String, Value>) -> Result<bool, ScriptError>{
+
+        let taxonomy_items = match utils::get_taxonomy_items(taxonomy_id, db_pool).await {
+            Ok(taxonomy_items) => taxonomy_items,
+            Err(e) => return Err(ScriptError::UnexpectedError)
+        };
+        
+        let keys: Vec<&String> = content_map.keys()
+            .map(|key| key)
+            .collect();
+        debug!("Keys from the request {:?}", keys);
+
+        let taxonomy_keys: Vec<&String> = taxonomy_items.iter()
+            .map(|taxonomy_item: &TaxonomyItem| &taxonomy_item.item_name)
+            .collect::<Vec<&String>>();
+        debug!("Keys from the taxonomy {:?}", taxonomy_keys);
+
+        let key_match = utils::do_vecs_match::<String>(&keys, &taxonomy_keys);
+        debug!("Keys match {}", key_match);
 
 
-        /*match sqlx::query_as!(
-            Content,
-            "INSERT INTO content (content_id, name, mime_type, tags, site_id, site_name, 
-                collection_id, collection_name, content_item_id, cache_control, created_by)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) 
-                RETURNING content_id, name, mime_type, site_id, 
-                    collection_id, content_length, tags, created_by, modified, version",
-            content_id,
-            self.name,
-            self.mime_type,
-            &updated_tags,
-            site_id,
-            site_name, 
-            collection_id,
-            coll_name,
-            &updated_tags,
-            
-            self.content.len() as i32,
-            match &self.cache_control {
-                Some(val) => val,
-                None => "max-age=0, no-store, must-revalidate",
-            },
-            identity.user
-        )
-        .fetch_one(&mut tx)
-        .await
-        {
-            Ok(text) => Ok(text),
-            Err(e) => {
-                error!("Error saving content {}", e);
-                Err(e)
-            }
-        }*/
+        //Check if keys and content_item_keys match
+        Ok(key_match)
     }
 }
 

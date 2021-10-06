@@ -23,6 +23,10 @@ pub enum ScriptError {
     BadRequest(String),
     #[display(fmt = "Unexpexted Error")]
     UnexpectedError,
+    #[display(fmt = "Transaction Error")]
+    TransactionError,
+    #[display(fmt = "Content Format Error")]
+    TaxonomyMismatch,
 }
 
 #[derive(Serialize)]
@@ -58,6 +62,8 @@ impl ResponseError for ScriptError {
             ScriptError::FileCreationError => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::AssetCreationError => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::UnexpectedError => StatusCode::INTERNAL_SERVER_ERROR,
+            ScriptError::TransactionError => StatusCode::INTERNAL_SERVER_ERROR,
+            ScriptError::TaxonomyMismatch => StatusCode::BAD_REQUEST
         }
     }
 }

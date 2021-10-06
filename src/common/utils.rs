@@ -127,7 +127,7 @@ pub async fn get_site_and_coll_id(
     Ok((site_id, coll_id))
 }
 
-pub async fn get_taxonomy_items(taxonomy_id: Uuid, db_pool: &DBPool) -> Result<Vec<TaxonomyItem>, Error>{
+pub async fn get_taxonomy_items(taxonomy_id: &Uuid, db_pool: &DBPool) -> Result<Vec<TaxonomyItem>, Error>{
    match sqlx::query_as!( TaxonomyItem,
         "SELECT taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal FROM taxonomy_item WHERE taxonomy_id = $1", 
         taxonomy_id)

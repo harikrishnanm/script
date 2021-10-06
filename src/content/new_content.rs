@@ -18,7 +18,7 @@ impl NewContent{
         db_pool: &DBPool,
         site_name: &str,
         coll_name: &str,
-    ) -> Result<(), Error> {
+    ) -> Result<(), ScriptError> {
         let content_id = Uuid::new_v4();
         let content_item_id = Uuid::new_v4();
 
@@ -26,7 +26,7 @@ impl NewContent{
             Ok(site_id) => site_id,
             Err(e) => {
                 error!("Could not fetch site id {}", e);
-                return Err(e);
+                return Err(ScriptError::UnexpectedError);
             }
         };
 
@@ -34,7 +34,7 @@ impl NewContent{
             Ok(tx) => tx,
             Err(e) => {
                 error!("Could not start update transaction");
-                return Err(e);
+                return Err(ScriptError::TransactionError);
             }
         };
 
@@ -47,6 +47,7 @@ impl NewContent{
 
         let mut updated_tags = self.tags.clone();
         updated_tags.push(self.name.clone());
+
         match &self.taxonomy_id {
             None => {
                 debug!("Raw content recieved");
@@ -66,17 +67,24 @@ impl NewContent{
                     },
                     Err(e) => {
                         error!("Error creating content_item ");
-                        tx.rollback().await?;
-                        return Err(e);
+                        tx.rollback().await.unwrap();
+                        return Err(ScriptError::UnexpectedError);
                     }
                 }
             },
             Some(taxonomy_id) => {
                 debug!("Structured content recieved. getting taxonomy");
                 match &self.content {
-                    Value::Object(content_obj) => {
-                        
-        
+                    Value::Object(content_map) => {
+                        match self.check_taxonomy(db_pool, taxonomy_id, content_map).await{
+                            Ok(taxonomy_matches) => {
+                                if !taxonomy_matches {
+                                    return Err(ScriptError::TaxonomyMismatch);
+                                }
+                            }, 
+                            Err(e) => return Err(e)
+                        }
+                        debug!("Taxonomy matches. Saving data");
                     },
                     _ => {
                         error!("Cannot save content since its not an object")
@@ -88,7 +96,7 @@ impl NewContent{
                 
          
             }
-        }
+        };
 
 
         //Update content table
@@ -118,11 +126,11 @@ impl NewContent{
         identity.user,
         ).execute(&mut tx).await {
             Ok(_) => Ok(()),
-            Err(e) => Err(e)
+            Err(e) => Err(ScriptError::UnexpectedError)
         }
     }
 
-    async fn check_taxonomy (db_pool: &DBPool, taxonomy_id: Uuid, content_map: Map<String, Value>) -> Result<bool, ScriptError>{
+    async fn check_taxonomy (self: &Self, db_pool: &DBPool, taxonomy_id: &Uuid, content_map: &Map<String, Value>) -> Result<bool, ScriptError>{
 
         let taxonomy_items = match utils::get_taxonomy_items(taxonomy_id, db_pool).await {
             Ok(taxonomy_items) => taxonomy_items,
@@ -142,9 +150,11 @@ impl NewContent{
         let key_match = utils::do_vecs_match::<String>(&keys, &taxonomy_keys);
         debug!("Keys match {}", key_match);
 
-
         //Check if keys and content_item_keys match
         Ok(key_match)
     }
 }
+
+    
+
 

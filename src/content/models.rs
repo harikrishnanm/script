@@ -9,8 +9,9 @@ pub struct NewContent {
     pub mime_type: Option<String>,
     pub tags: Vec<String>,
     pub content: Value,
-    pub raw: Option<bool>,
+    pub raw: bool,
     pub cache_control: Option<String>,
+    pub taxonomy_id: Option<Uuid>
 }
 
 #[derive(Serialize, Deserialize, Debug)]

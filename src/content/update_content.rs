@@ -1,88 +1,16 @@
-use crate::rbac::models::Identity;
+
+use crate::{error::ScriptError, rbac::models::Identity};
 use crate::content::models::*;
 use crate::DBPool;
 use crate::common::utils;
 use log::*;
-use sqlx::Error;
+
+use sqlx::{Error, Transaction, Postgres};
 use uuid::Uuid;
 
 
-fn test(){
-    debug!("Test fn");
-}
 
-impl NewContent{
-    pub async fn save(
-        self: &Self,
-        identity: &Identity,
-        db_pool: &DBPool,
-        site_name: &str,
-        coll_name: &str,
-    ) -> Result<Content, Error> {
-        let content_id = Uuid::new_v4();
-
-        let (site_id, collection_id) = match utils::get_site_and_coll_id(site_name, coll_name, db_pool).await {
-            Ok(site_id) => site_id,
-            Err(e) => {
-                error!("Could not fetch site id {}", e);
-                return Err(e);
-            }
-        };
-
-        let mut tx = match db_pool.begin().await {
-            Ok(tx) => tx,
-            Err(e) => {
-                error!("Could not start update transaction");
-                return Err(e);
-            }
-        };
-
-
-        let mut updated_tags = self.tags.clone();
-        updated_tags.push(self.name.clone());
-
-       test();
-
-
-        match sqlx::query_as!(
-            Content,
-            "INSERT INTO content (content_id, name, mime_type, site_id, site_name, 
-                collection_id, collection_name, tags, content, 
-                content_length, cache_control, created_by)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) 
-                RETURNING content_id, name, mime_type, site_id, 
-                    collection_id, content_length, tags, created_by, modified, version",
-            content_id,
-            self.name,
-            self.mime_type,
-            site_id,
-            site_name,
-            collection_id,
-            coll_name,
-            &updated_tags,
-            match self.content.len() {
-                0 => "".to_string(),
-                _ => self.content.to_string(),
-            },
-            self.content.len() as i32,
-            match &self.cache_control {
-                Some(val) => val,
-                None => "max-age=0, no-store, must-revalidate",
-            },
-            identity.user
-        )
-        .fetch_one(&mut tx)
-        .await
-        {
-            Ok(text) => Ok(text),
-            Err(e) => {
-                error!("Error saving content {}", e);
-                Err(e)
-            }
-        }
-    }
-}
-
+///Update content implementation
 impl UpdateContent {
     pub async fn update(
         self: &Self,

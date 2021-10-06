@@ -1,4 +1,5 @@
-pub mod content;
+pub mod new_content;
+//pub mod update_content;
 pub mod models;
 
 use actix_web::{get, http, post, put, web, web::Path, HttpResponse};
@@ -19,8 +20,8 @@ async fn get(
   Path((site_name, coll_name, content_name)): Path<(String, String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
   debug!("Getting {} in collection {}", coll_name, content_name);
-
-  let cache_key = format!("script:{}:{}:{}", site_name, coll_name, content_name);
+  Ok(HttpResponse::Ok().finish())
+  /*let cache_key = format!("script:{}:{}:{}", site_name, coll_name, content_name);
 
   let _cache_conn: RedisConnection = data.redis_pool.get().unwrap();
   let content_response = match cache::get::<String>(&data.redis_pool, &cache_key) {
@@ -32,7 +33,7 @@ async fn get(
     None => {
       debug!("Value not found in redis. Getting data from database");
       match sqlx::query!(
-        "SELECT content, mime_type, cache_control FROM content
+        "SELECT content_item_id, mime_type, cache_control FROM content
           WHERE site_name = $1 AND collection_name = $2 AND name = $3",
         site_name,
         coll_name,
@@ -73,7 +74,7 @@ async fn get(
       .content_type(&content_response.mime_type)
       .header(http::header::CACHE_CONTROL, content_response.cache_control)
       .body(content_response.content_str),
-  )
+  )*/
 }
 
 #[post("/site/{site}/collection/{collection}/content")]
@@ -117,7 +118,8 @@ async fn update(
     coll_name
   );
   debug!("Adding new content to collection {:?}", update_content);
-  match update_content
+  Ok(HttpResponse::Ok().finish())
+  /*match update_content
     .update(
       &identity.into_inner(),
       &data.db_pool,
@@ -139,5 +141,5 @@ async fn update(
       error!("Error saving content text {}", e);
       Err(ScriptError::ContentCreationFailure)
     }
-  }
+  }*/
 }

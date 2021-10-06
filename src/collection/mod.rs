@@ -23,8 +23,8 @@ pub async fn get(
         "Getting collection {}/{} for {}",
         site_name, collection_name, identity.user
     );
-
-    let cache_key = format!("script:{}:{}", site_name, collection_name);
+    Ok(HttpResponse::Ok().finish())
+   /* let cache_key = format!("script:{}:{}", site_name, collection_name);
     let _cache_conn: RedisConnection = data.redis_pool.get().unwrap();
 
     let mut cache_control = String::new();
@@ -61,7 +61,7 @@ pub async fn get(
 
             let content_query_fut = sqlx::query_as!(
                 Content,
-                "SELECT content_id as id, name, content, mime_type, tags, 
+                "SELECT content_id as id, name, content_item_id, mime_type, tags, 
                 'site/'||site_name||'/collection/'||collection_name||'/'||name as url
                  FROM content WHERE site_name = $1 AND collection_name = $2",
                 site_name,
@@ -150,7 +150,7 @@ pub async fn get(
 
     // Get assets
 
-    /*let response = CollectionResponse {
+    let response = CollectionResponse {
         name: collection_name,
         content: contents,
     };

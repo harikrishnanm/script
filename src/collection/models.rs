@@ -40,7 +40,7 @@ pub struct Content {
     pub id: Uuid,
     pub name: String,
     pub tags: Vec<String>,
-    pub content: String,
+    pub content_item_id: Uuid,
     pub mime_type: Option<String>,
     pub url: Option<String>,
 }

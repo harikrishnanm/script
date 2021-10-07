@@ -10,7 +10,6 @@ CREATE TABLE content (
   content_item_id UUID NOT NULL,
   raw BOOLEAN NOT NULL DEFAULT true,
   taxonomy_id UUID,
-  content_length INTEGER NOT NULL,
   cache_control VARCHAR(200) NOT NULL DEFAULT 'max-age=0, no-store, must-revalidate',
   version INTEGER NOT NULL DEFAULT 0,
   created_by VARCHAR(50) NOT NULL,
@@ -47,6 +46,8 @@ CREATE TABLE content_archive (
 
 CREATE TABLE content_item_raw (
   id SERIAL PRIMARY KEY,
+  name VARCHAR(50) NOT NULL,
+  mime_type VARCHAR(50),
   content_item_raw_id UUID NOT NULL,
   content TEXT NOT NULL
 );

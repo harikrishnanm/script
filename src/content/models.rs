@@ -4,6 +4,14 @@ use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct NewRawContent {
+    pub name: String,
+    pub mime_type: Option<String>,
+    pub tags: Vec<String>,
+    pub content: String,
+    pub cache_control: Option<String>,
+}
+
 pub struct NewContent {
     pub name: String,
     pub mime_type: Option<String>,
@@ -11,12 +19,9 @@ pub struct NewContent {
     pub content: Value,
     pub raw: bool,
     pub cache_control: Option<String>,
-    pub taxonomy_id: Option<Uuid>
+    pub taxonomy_id: Option<Uuid>,
+    pub ordinal: Option<i32>,
 }
-
-
-
-
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RawContent {

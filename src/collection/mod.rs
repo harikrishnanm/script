@@ -23,8 +23,7 @@ pub async fn get(
         "Getting collection {}/{} for {}",
         site_name, collection_name, identity.user
     );
-    Ok(HttpResponse::Ok().finish())
-   /* let cache_key = format!("script:{}:{}", site_name, collection_name);
+    let cache_key = format!("script:{}:{}", site_name, collection_name);
     let _cache_conn: RedisConnection = data.redis_pool.get().unwrap();
 
     let mut cache_control = String::new();
@@ -36,71 +35,7 @@ pub async fn get(
             serde_json::from_str(&val).unwrap()
         }
         None => {
-            // get header
-            debug!("Getting value from DB");
-            match sqlx::query!(
-                "SELECT name, cache_control FROM collection WHERE site_name = $1 AND name = $2",
-                site_name,
-                collection_name
-            )
-            .fetch_one(&data.db_pool)
-            .await
-            {
-                Ok(result) => cache_control = result.cache_control,
-                Err(e) => {
-                    error!(
-                        "Couldnt get cache control header..will not process further {}",
-                        e
-                    );
-                    return Err(ScriptError::FileNotFound);
-                }
-            };
-            //Get content and assets
-            let _contents: Vec<Content> = Vec::new();
-            let _assets: Vec<Asset> = Vec::new();
-
-            let content_query_fut = sqlx::query_as!(
-                Content,
-                "SELECT content_id as id, name, content_item_id, mime_type, tags, 
-                'site/'||site_name||'/collection/'||collection_name||'/'||name as url
-                 FROM content WHERE site_name = $1 AND collection_name = $2",
-                site_name,
-                collection_name
-            )
-            .fetch_all(&data.db_pool);
-
-            let asset_query_fut = sqlx::query_as!(
-                Asset,
-                "SELECT asset.asset_id as id, asset.name, 
-                    file.name as file_name, file.mime_type, file.path, file.size
-                FROM asset 
-                INNER JOIN file 
-                ON asset.file_id = file.file_id 
-                AND asset.coll_name = $1
-                AND asset.site_name = $2",
-                collection_name,
-                site_name
-            )
-            .fetch_all(&data.db_pool);
-
-            match try_join!(content_query_fut, asset_query_fut) {
-                Ok((contents, assets)) => {
-                    debug!("Result {:?},## {:?}", contents, assets);
-                    let cached_response = CachedCollectionResponse {
-                        cache_control: cache_control,
-                        name: collection_name,
-                        contents: contents,
-                        assets: assets,
-                    };
-                    let cached_response_json = serde_json::to_string(&cached_response).unwrap();
-                    cache::put::<String>(&data.redis_pool, &cache_key, cached_response_json);
-                    cached_response
-                }
-                Err(e) => {
-                    error!("Error {}", e);
-                    return Err(ScriptError::FileNotFound);
-                }
-            }
+ 
         }
     };
 
@@ -117,7 +52,7 @@ pub async fn get(
     Ok(k)
     // get all text/content  for given
 
-    /*match sqlx::query!(
+    match sqlx::query!(
         "SELECT * FROM content WHERE site_name = $1 AND collection_name = $2",
         site_name,
         collection_name
@@ -146,7 +81,7 @@ pub async fn get(
             error!("Error getting content {}", e);
             return Err(ScriptError::FileNotFound);
         }
-    }*/
+    }
 
     // Get assets
 
@@ -156,7 +91,7 @@ pub async fn get(
     };
 
     let mut builder = HttpResponse::Ok();
-    Ok(builder.header(CACHE_CONTROL, cache_control).json(response))*/
+    Ok(builder.header(CACHE_CONTROL, cache_control).json(response))
 }
 
 #[post("/site/{site_name}/collection")]

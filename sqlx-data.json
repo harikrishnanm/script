@@ -75,6 +75,20 @@
       ]
     }
   },
+  "07f2d9427ba0493977caa7763d7cc97e7e94b33ac95c6362023834fbbb6ad976": {
+    "query": "INSERT INTO content_item_raw (content_item_raw_id, content, name) VALUES ($1, $2, $3)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Text",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "0f47e9e20045698aff6b12306e8425a5856add07391ba308d9968f952c2e5cdb": {
     "query": "SELECT taxonomy_id FROM taxonomy WHERE name = $1 and site_name = $2",
     "describe": {
@@ -294,29 +308,6 @@
       ]
     }
   },
-  "269e1578320f1808c053d8dd0218f0b3dfc8234b90009a3ddd8e078caeb5515c": {
-    "query": "INSERT INTO content \n            (content_id, name, tags, site_id, site_name, collection_id, collection_name, \n                content_item_id, raw, taxonomy_id, cache_control, created_by ) \n            VALUES \n            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "VarcharArray",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Bool",
-          "Uuid",
-          "Varchar",
-          "Varchar"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "3a9333d63c77940da927856f6e406cab9c46cac220f58b873b934f5bcbf273c8": {
     "query": "SELECT taxonomy_id, name FROM taxonomy WHERE site_name =$1",
     "describe": {
@@ -434,19 +425,6 @@
         false,
         false
       ]
-    }
-  },
-  "4e78629b6f370d512841b0165768d0d440b1b589640a8d94b44fef392019c970": {
-    "query": "INSERT INTO content_item_raw (content_item_raw_id, content) VALUES ($1, $2)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text"
-        ]
-      },
-      "nullable": []
     }
   },
   "6fb2d568834e8daa5fd73bed64c6f95e0a09e532424f78e4b4bc8509de272414": {
@@ -757,6 +735,27 @@
       ]
     }
   },
+  "b86fd9e03ec7a8917cdfadc243391e8895dea9b01da135546ea95a8662f97fbf": {
+    "query": "INSERT INTO content \n            (content_id, name, tags, site_id, site_name, collection_id, collection_name, \n                content_item_id, cache_control, created_by ) \n            VALUES \n            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
+    "describe": {
+      "columns": [],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Varchar",
+          "VarcharArray",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Uuid",
+          "Varchar",
+          "Varchar"
+        ]
+      },
+      "nullable": []
+    }
+  },
   "bf8f60302e077230915daba6b3ce1cbff99ee876a78159d0c6e6c9797fd9d00d": {
     "query": "SELECT site_id FROM site where name = $1",
     "describe": {
@@ -1058,6 +1057,40 @@
         true,
         false,
         true
+      ]
+    }
+  },
+  "fbfd51a79a1df87b29300501fe1a1c6d91f0df6d7224324ea65e54189ab0e605": {
+    "query": "SELECT content_item_raw.content, content_item_raw.mime_type, content.cache_control FROM content_item_raw\n                 INNER JOIN content ON content_item_raw_id = content.content_item_id \n                 AND content.site_name = $1 AND content.collection_name = $2 and content.name = $3",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "content",
+          "type_info": "Text"
+        },
+        {
+          "ordinal": 1,
+          "name": "mime_type",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 2,
+          "name": "cache_control",
+          "type_info": "Varchar"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Text",
+          "Text",
+          "Text"
+        ]
+      },
+      "nullable": [
+        false,
+        true,
+        false
       ]
     }
   }

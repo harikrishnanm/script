@@ -4,7 +4,6 @@ pub mod rbac;
 pub mod utils;
 pub mod validators;
 
-use crate::DBPool;
 use actix_web::{
     delete, get, post, put, web,
     web::{Data, Path, ReqData},
@@ -12,19 +11,25 @@ use actix_web::{
 };
 use actix_web_validator::Json;
 use log::*;
+use mongodb::{error::Error, Client};
 use regex::RegexSet;
-use sqlx::Error;
 use std::collections::HashMap;
 use uuid::Uuid;
 
 use crate::constants;
 use crate::error::ScriptError;
 use crate::AppData;
+use crate::DataStore;
+use bson::document::Document;
+use chrono::offset::Utc;
+use futures::TryStreamExt;
 use models::*;
+use mongodb::options::IndexOptions;
+use mongodb::IndexModel;
 
 pub async fn reload_rbac(data: &AppData) -> Result<(), Error> {
     debug!("Reloading rbac policies");
-    match load(&data.db_pool).await {
+    match load(&data.data_store).await {
         Ok(rbac) => {
             debug!("Loaded new RBAC set");
             *data.rbac.lock().unwrap() = rbac;
@@ -36,7 +41,7 @@ pub async fn reload_rbac(data: &AppData) -> Result<(), Error> {
         }
     }
 }
-
+/*
 #[get("/admin/rbac/{rbac_id}")]
 pub async fn get_rbac_by_id(
     _identity: ReqData<Identity>,
@@ -120,20 +125,20 @@ pub async fn update(
         }
     }
 }
-
+*/
 #[post("/admin/rbac")]
 pub async fn save(
     data: Data<AppData>,
-    rbac_policy: Json<NewRbacPolicy>,
+    rbac_policy: Json<RbacPolicyRequest>,
     identity: web::ReqData<Identity>,
 ) -> Result<HttpResponse, ScriptError> {
     info!("Creating new RBAC policy");
-    match rbac_policy
-        .save(&data.db_pool, &identity.into_inner())
-        .await
-    {
+
+    let data_store = &data.data_store;
+
+    match rbac_policy.save(data_store, &identity.into_inner()).await {
         Ok(rbac_policy) => {
-            info!("Saved data");
+            info!("Saved data. Reloading RBAC rules");
             //Refresh the cache
             match reload_rbac(&data).await {
                 Ok(_) => debug!("RBAC reloaded"),
@@ -145,21 +150,25 @@ pub async fn save(
         }
         Err(e) => {
             error!("Error creating rbac policy {}", e);
-            match e {
-                Error::Database(_fields) => Err(ScriptError::RbacCreationConflict(
-                    "Check params".to_string(),
-                )),
-                _ => Err(ScriptError::UnexpectedRbacCreationFailure),
-            }
+            Err(e)
         }
     }
 }
 
-pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
-    let rows =
-        sqlx::query!("SELECT rbac_id, path, path_match, method, rbac_role, rbac_user FROM rbac")
-            .fetch_all(db_pool)
-            .await?;
+pub async fn load(data_store: &DataStore) -> Result<Rbac, Error> {
+    debug!("Loading RBAC policies");
+
+    let db = &data_store.db;
+    let rbac_coll = db.collection::<RbacPolicy>("RBAC");
+
+    let cursor = match rbac_coll.find(None, None).await {
+        Ok(cursor) => cursor,
+        Err(e) => {
+            error!("Error loading RBAC {}", e);
+            return Err(e);
+        }
+    };
+
     let mut path_regex: Vec<String> = Vec::new();
     let mut methods: HashMap<usize, Vec<String>> = HashMap::new();
     let mut users: HashMap<usize, Vec<String>> = HashMap::new();
@@ -167,17 +176,59 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
     let mut public_paths: Vec<String> = Vec::new();
     let mut idx: usize = 0;
 
-    for row in rows {
-        let path = row.path;
-        let method = row.method;
-        let user = row.rbac_user;
-        let role = row.rbac_role;
-        let path_match = row.path_match;
+    let mut docs: Vec<RbacPolicy> = cursor.try_collect().await?;
+    if docs.len() == 0 {
+        debug!("No RBAC policy found. Creating default policy");
+        let uuid = Uuid::new_v4().to_string();
+        let created_at = Utc::now().naive_utc();
+        let default = RbacPolicy {
+            rbac_id: uuid,
+            path: "/admin".to_string(),
+            path_match: "STARTSWITH".to_string(),
+            method: "*".to_string(),
+            rbac_role: "CMS ADMIN".to_string(),
+            rbac_user: "cmsadmin".to_string(),
+            description: "Allow CMS Admin access to /admin/* routes".to_string(),
+            created_at: created_at,
+            created_by: "Yoda".to_string(),
+            modified_by: None,
+            modified_at: None,
+        };
+        rbac_coll.insert_one(&default, None).await?;
 
+        let mut index_doc = Document::new();
+        index_doc.insert("path", 1);
+        index_doc.insert("path_match", 1);
+        index_doc.insert("method", 1);
+        index_doc.insert("rbac_user", 1);
+        index_doc.insert("rbac_role", 1);
+        let index_options = IndexOptions::builder()
+            .unique(Some(true))
+            .name(Some("rbac_uniq_idx".to_string()))
+            .build();
+
+        let index_model = IndexModel::builder()
+            .keys(index_doc)
+            .options(index_options)
+            .build();
+        rbac_coll.create_index(index_model, None).await?;
+        docs.push(default);
+    }
+
+    for doc in docs {
+        let path = doc.path;
+        let method = doc.method;
+        let user = doc.rbac_user;
+        let role = doc.rbac_role;
+        let path_match = doc.path_match;
 
         if user == constants::WILDCARD && role == constants::WILDCARD && method == "GET" {
-
-            let pub_path_str = format!("{}{}{}", constants::REGEX_PREFIX, path.clone(), constants::REGEX_STARTSWITH_SUFFIX );
+            let pub_path_str = format!(
+                "{}{}{}",
+                constants::REGEX_PREFIX,
+                path.clone(),
+                constants::REGEX_STARTSWITH_SUFFIX
+            );
             debug!("Public path regex {}", pub_path_str);
             public_paths.push(pub_path_str);
         }
@@ -194,7 +245,7 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
         //Check if the pattern is already added.
         match path_regex.iter().position(|pattern| pattern.eq(&regex_str)) {
             None => {
-                trace!("No exiting path pattern found...");
+                trace!("No exis ting path pattern found...");
                 path_regex.push(regex_str.to_string());
                 methods.insert(idx, vec![method]);
                 users.insert(idx, vec![user]);
@@ -220,6 +271,7 @@ pub async fn load(db_pool: &DBPool) -> Result<Rbac, Error> {
             }
         }
     }
+
     trace!("Path_regex_str vector  {:?}", path_regex);
     trace!("Methods hashmap {:?}", methods);
     trace!("Users hashmap {:?}", users);

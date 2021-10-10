@@ -34,12 +34,10 @@ pub async fn get(
             trace!("Cached Value {}", val);
             serde_json::from_str(&val).unwrap()
         }
-        None => {
- 
-        }
+        None => {}
     };
 
-    let response = CollectionResponse {
+    /*let response = CollectionResponse {
         name: cached_collection_response.name,
         contents: cached_collection_response.contents,
         assets: cached_collection_response.assets,
@@ -49,7 +47,6 @@ pub async fn get(
     let k: actix_web::HttpResponse = builder
         .header(CACHE_CONTROL, cached_collection_response.cache_control)
         .json(response);
-    Ok(k)
     // get all text/content  for given
 
     match sqlx::query!(
@@ -91,7 +88,8 @@ pub async fn get(
     };
 
     let mut builder = HttpResponse::Ok();
-    Ok(builder.header(CACHE_CONTROL, cache_control).json(response))
+    Ok(builder.header(CACHE_CONTROL, cache_control).json(response))*/
+    Ok(HttpResponse::Ok().finish())
 }
 
 #[post("/site/{site_name}/collection")]

@@ -10,7 +10,7 @@ env_logger ="0.9.0"
 log="0.4.14"
 dotenv = "0.15.0"
 derive_more="0.99.16"
-sqlx = { version = "0.5.7", features = [ "postgres", "migrate", "macros","chrono", "uuid", "runtime-async-std-native-tls", "offline" ]}
+#sqlx = { version = "0.5.7", features = [ "postgres", "migrate", "macros","chrono", "uuid", "runtime-async-std-native-tls", "offline" ]}
 rand = "0.8.4"
 actix-web = "3.3.2"
 actix-rt = "2.2.0"
@@ -39,3 +39,9 @@ validator_derive = "0.12.0"
 etag = "3.0.0"
 redis ={version = "0.21.2", features = ["r2d2", "tokio-comp", "connection-manager"]}
 r2d2_redis = "0.14.0"
+async-recursion = "0.3.2"
+bson = "2.0.0"
+[dependencies.mongodb]
+version = "2.0.0"
+default-features = false
+features = ["async-std-runtime", "bson-uuid-0_8"]

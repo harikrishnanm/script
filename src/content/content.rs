@@ -5,7 +5,7 @@ use crate::{error::ScriptError, rbac::models::Identity};
 use log::*;
 use uuid::Uuid;
 
-impl NewRawContent {
+impl NewContent {
     pub async fn save(
         self: &Self,
         identity: &Identity,
@@ -13,7 +13,8 @@ impl NewRawContent {
         site_name: &str,
         coll_name: &str,
     ) -> Result<(), ScriptError> {
-        debug!("Saving raw content");
+        debug!("Saving new content");
+        trace!("{:?}", &self);
 
         let content_id = Uuid::new_v4();
         let content_item_id = Uuid::new_v4();
@@ -47,64 +48,7 @@ impl NewRawContent {
 
         debug!("Final set of tags {:?}", updated_tags);
 
-        let content_item_raw_id = Uuid::new_v4();
-        match sqlx::query!(
-            "INSERT INTO content_item_raw (content_item_raw_id, content, name) VALUES ($1, $2, $3)",
-            content_item_raw_id,
-            &self.content,
-            &self.name,
-        )
-        .execute(&mut tx)
-        .await
-        {
-            Ok(_) => {
-                debug!("Content item created");
-            }
-            Err(e) => {
-                error!("Error creating content item {} ", e);
-                tx.rollback().await.unwrap();
-                return Err(ScriptError::UnexpectedError);
-            }
-        }
-        //Update content table
-
-        let cache_control_str = match &self.cache_control {
-            Some(value) => value,
-            None => "private",
-        };
-
-        match sqlx::query!(
-            "INSERT INTO content 
-            (content_id, name, tags, site_id, site_name, collection_id, collection_name, 
-                content_item_id, cache_control, created_by ) 
-            VALUES 
-            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-            content_id,
-            &self.name,
-            &updated_tags,
-            site_id,
-            site_name,
-            collection_id,
-            coll_name,
-            content_item_raw_id,
-            &cache_control_str,
-            identity.user,
-        )
-        .execute(&mut tx)
-        .await
-        {
-            Ok(_) => match tx.commit().await {
-                Ok(_) => Ok(()),
-                Err(e) => {
-                    error!("Error commiting transaction {}", e);
-                    Err(ScriptError::ContentCreationFailure)
-                }
-            },
-            Err(e) => {
-                error!("Error creating content header {}", e);
-                Err(ScriptError::UnexpectedError)
-            }
-        }
+        Ok(())
     }
 }
 

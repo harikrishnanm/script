@@ -5,7 +5,11 @@ use serde_derive::Serialize;
 
 #[derive(Debug, Display)]
 pub enum ScriptError {
-    #[display(fmt = "Duplicate policy. Creation failed {}", _0)]
+    #[display(fmt = "Requested resource not found")]
+    ResourceNotFound,
+    #[display(fmt = "Error writing to database")]
+    DatabaseError(String),
+    #[display(fmt = "Duplicate policy. Creation failed due to {}", _0)]
     RbacCreationConflict(String),
     #[display(fmt = "Creation failed due to an unexpected error")]
     UnexpectedRbacCreationFailure,
@@ -56,6 +60,7 @@ impl ResponseError for ScriptError {
             ScriptError::RbacCreationConflict(_) => StatusCode::BAD_REQUEST,
             ScriptError::UnexpectedRbacCreationFailure => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::FileNotFound => StatusCode::NOT_FOUND,
+            ScriptError::ResourceNotFound => StatusCode::NOT_FOUND,
             ScriptError::BadRequest(_) => StatusCode::BAD_REQUEST,
             ScriptError::ContentCreationFailure => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::FolderCreationError => StatusCode::INTERNAL_SERVER_ERROR,
@@ -63,7 +68,8 @@ impl ResponseError for ScriptError {
             ScriptError::AssetCreationError => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::UnexpectedError => StatusCode::INTERNAL_SERVER_ERROR,
             ScriptError::TransactionError => StatusCode::INTERNAL_SERVER_ERROR,
-            ScriptError::TaxonomyMismatch => StatusCode::BAD_REQUEST
+            ScriptError::TaxonomyMismatch => StatusCode::BAD_REQUEST,
+            ScriptError::DatabaseError(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

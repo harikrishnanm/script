@@ -2,9 +2,9 @@ pub mod asset;
 pub mod models;
 
 use actix_web::{
-  post, web,
-  web::{Data, Path, ReqData},
-  HttpResponse,
+    post, web,
+    web::{Data, Path, ReqData},
+    HttpResponse,
 };
 
 use log::*;
@@ -18,28 +18,28 @@ use crate::AppData;
 
 #[post("/site/{site_name}/collection/{collection_name}/asset")]
 async fn save(
-  identity: ReqData<Identity>,
-  data: Data<AppData>,
-  new_asset: web::Json<NewAsset>,
-  Path((site_name, coll_name)): Path<(String, String)>,
+    identity: ReqData<Identity>,
+    data: Data<AppData>,
+    new_asset: web::Json<NewAsset>,
+    Path((site_name, coll_name)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
-  debug!("Creating asset under {}/{}", site_name, coll_name);
+    debug!("Creating asset under {}/{}", site_name, coll_name);
 
-  let db_pool = &data.db_pool;
-  match new_asset
-    .save(&identity, db_pool, &site_name, &coll_name)
-    .await
-  {
-    Ok(_) => {
-      let coll_cache_key = format!("script:{}:{}", site_name, coll_name);
-      cache::delete(&data.redis_pool, &coll_cache_key);
-      Ok(HttpResponse::Created().finish())
+    let db_pool = &data.db_pool;
+    match new_asset
+        .save(&identity, db_pool, &site_name, &coll_name)
+        .await
+    {
+        Ok(_) => {
+            let coll_cache_key = format!("script:{}:{}", site_name, coll_name);
+            cache::delete(&data.redis_pool, &coll_cache_key);
+            Ok(HttpResponse::Created().finish())
+        }
+        Err(e) => {
+            error!("Error creating asset {}", e);
+            return Err(ScriptError::AssetCreationError);
+        }
     }
-    Err(e) => {
-      error!("Error creating asset {}", e);
-      return Err(ScriptError::AssetCreationError);
-    }
-  }
 
-  //Ok(HttpResponse::Ok().finish())
+    //Ok(HttpResponse::Ok().finish())
 }

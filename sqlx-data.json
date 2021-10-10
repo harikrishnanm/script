@@ -75,20 +75,6 @@
       ]
     }
   },
-  "07f2d9427ba0493977caa7763d7cc97e7e94b33ac95c6362023834fbbb6ad976": {
-    "query": "INSERT INTO content_item_raw (content_item_raw_id, content, name) VALUES ($1, $2, $3)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Text",
-          "Varchar"
-        ]
-      },
-      "nullable": []
-    }
-  },
   "0f47e9e20045698aff6b12306e8425a5856add07391ba308d9968f952c2e5cdb": {
     "query": "SELECT taxonomy_id FROM taxonomy WHERE name = $1 and site_name = $2",
     "describe": {
@@ -515,6 +501,56 @@
       ]
     }
   },
+  "7e7d8d288094b9ee7548bae93f38a28896255a3270cffb790e643470c57438d5": {
+    "query": "SELECT taxonomy_id, taxonomy_item_id, taxonomy_item.item_name, \n      item_type, ordinal, item_taxonomy_id\n      FROM taxonomy_item\n      WHERE taxonomy_id = $1\n      ORDER BY ordinal ASC",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "taxonomy_item_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "item_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_type",
+          "type_info": "Bpchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "ordinal",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 5,
+          "name": "item_taxonomy_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "923bcc704dfc433e1b3d2127135df9153f87cbb22bb09238bac58c7a2ad2f08e": {
     "query": "UPDATE rbac SET path = $1, path_match = $2, method = $3, rbac_role = $4, rbac_user = $5, description = $6, modified_by = $8, modified = $7\n        WHERE rbac_id = $9 RETURNING rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified_by, modified",
     "describe": {
@@ -714,6 +750,61 @@
       ]
     }
   },
+  "a2f250f508f6e6283a85191043c08b77e32983484bf854fd2866a1332bc25d58": {
+    "query": "INSERT INTO taxonomy_item (taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal, item_taxonomy_id) \n            VALUES ($1, $2, $3, $4, $5, $6)\n            RETURNING taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal, item_taxonomy_id",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_item_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "item_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_type",
+          "type_info": "Bpchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "ordinal",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 5,
+          "name": "item_taxonomy_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid",
+          "Uuid",
+          "Varchar",
+          "Bpchar",
+          "Int4",
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ]
+    }
+  },
   "ac9d3ce5c95bc1be289ac52025a7d280bd5e58a4e307ca421ad8ff30bc219747": {
     "query": "SELECT collection_id FROM collection where site_name = $1 and name = $2",
     "describe": {
@@ -733,27 +824,6 @@
       "nullable": [
         false
       ]
-    }
-  },
-  "b86fd9e03ec7a8917cdfadc243391e8895dea9b01da135546ea95a8662f97fbf": {
-    "query": "INSERT INTO content \n            (content_id, name, tags, site_id, site_name, collection_id, collection_name, \n                content_item_id, cache_control, created_by ) \n            VALUES \n            ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)",
-    "describe": {
-      "columns": [],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Varchar",
-          "VarcharArray",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "Uuid",
-          "Varchar",
-          "Varchar"
-        ]
-      },
-      "nullable": []
     }
   },
   "bf8f60302e077230915daba6b3ce1cbff99ee876a78159d0c6e6c9797fd9d00d": {
@@ -838,98 +908,6 @@
       ]
     }
   },
-  "c8f0b30c17b278433644fd0d721c8d26efe626361a3d7dc929294edf3472bfce": {
-    "query": "INSERT INTO taxonomy_item (taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal) \n    VALUES ($1, $2, $3, $4, $5)\n    RETURNING taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "taxonomy_item_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "taxonomy_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "item_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "item_type",
-          "type_info": "Bpchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "ordinal",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid",
-          "Uuid",
-          "Varchar",
-          "Bpchar",
-          "Int4"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
-  "e3fdf720badcd30189b8f052e91650dbac2d7c3c232fbd9762a9a220e2c97d22": {
-    "query": "SELECT taxonomy_id, taxonomy_item_id, taxonomy_item.item_name, \n      item_type, ordinal \n      FROM taxonomy_item\n      WHERE taxonomy_id = $1\n      ORDER BY ordinal ASC",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "taxonomy_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "taxonomy_item_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "item_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "item_type",
-          "type_info": "Bpchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "ordinal",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
-        false
-      ]
-    }
-  },
   "e873da84be2cfffedf4ddb53d79af3746a29bb8ed93a46f07506020ac3d38a9a": {
     "query": "SELECT site_id FROM site WHERE name = $1",
     "describe": {
@@ -946,50 +924,6 @@
         ]
       },
       "nullable": [
-        false
-      ]
-    }
-  },
-  "eda28838828bb31f124cb436e6bf3f202caad22e63047c3e347a5526926ae6c7": {
-    "query": "SELECT taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal FROM taxonomy_item WHERE taxonomy_id = $1",
-    "describe": {
-      "columns": [
-        {
-          "ordinal": 0,
-          "name": "taxonomy_item_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 1,
-          "name": "taxonomy_id",
-          "type_info": "Uuid"
-        },
-        {
-          "ordinal": 2,
-          "name": "item_name",
-          "type_info": "Varchar"
-        },
-        {
-          "ordinal": 3,
-          "name": "item_type",
-          "type_info": "Bpchar"
-        },
-        {
-          "ordinal": 4,
-          "name": "ordinal",
-          "type_info": "Int4"
-        }
-      ],
-      "parameters": {
-        "Left": [
-          "Uuid"
-        ]
-      },
-      "nullable": [
-        false,
-        false,
-        false,
-        false,
         false
       ]
     }
@@ -1055,6 +989,56 @@
         false,
         false,
         true,
+        false,
+        true
+      ]
+    }
+  },
+  "f9ba398b4f4472ed5ae162f52fd6090e7f1157e9033ee4230332fdad6194376c": {
+    "query": "SELECT taxonomy_item_id, taxonomy_id, item_name, item_type, ordinal, item_taxonomy_id FROM taxonomy_item WHERE taxonomy_id = $1",
+    "describe": {
+      "columns": [
+        {
+          "ordinal": 0,
+          "name": "taxonomy_item_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 1,
+          "name": "taxonomy_id",
+          "type_info": "Uuid"
+        },
+        {
+          "ordinal": 2,
+          "name": "item_name",
+          "type_info": "Varchar"
+        },
+        {
+          "ordinal": 3,
+          "name": "item_type",
+          "type_info": "Bpchar"
+        },
+        {
+          "ordinal": 4,
+          "name": "ordinal",
+          "type_info": "Int4"
+        },
+        {
+          "ordinal": 5,
+          "name": "item_taxonomy_id",
+          "type_info": "Uuid"
+        }
+      ],
+      "parameters": {
+        "Left": [
+          "Uuid"
+        ]
+      },
+      "nullable": [
+        false,
+        false,
+        false,
+        false,
         false,
         true
       ]

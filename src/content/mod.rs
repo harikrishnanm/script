@@ -1,5 +1,5 @@
+pub mod content;
 pub mod models;
-pub mod raw_content;
 
 use actix_web::{get, http, post, put, web, web::Path, HttpResponse};
 use log::*;
@@ -79,11 +79,11 @@ async fn get(
 async fn save(
     identity: web::ReqData<Identity>,
     data: web::Data<AppData>,
-    raw_content: web::Json<NewRawContent>,
+    new_content: web::Json<NewContent>,
     Path((site_name, coll_name)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
     debug!("Got request for saving Content data");
-    match raw_content
+    match new_content
         .save(
             &identity.into_inner(),
             &data.db_pool,

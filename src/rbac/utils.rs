@@ -6,7 +6,6 @@ use log::{debug, error, trace};
 
 const WILDCARD: &str = r#"*"#;
 
-
 pub fn check_token(req: &ServiceRequest) -> Result<Identity, AuthError> {
     match &req.head().headers.get("authorization") {
         None => {

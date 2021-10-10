@@ -1,11 +1,11 @@
 use crate::rbac::validators::*;
+use bson::serde_helpers::uuid_as_binary;
 use chrono::NaiveDateTime;
 use regex::RegexSet;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use uuid::Uuid;
 use validator::Validate;
-
 pub struct Authenticate;
 
 #[derive(Debug, Clone)]
@@ -46,7 +46,7 @@ pub struct RbacParams {
 }
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
-pub struct NewRbacPolicy {
+pub struct RbacPolicyRequest {
     #[validate(length(min = 1, max = 25))]
     pub path: String,
     #[validate(custom = "validate_path_match")]
@@ -61,34 +61,17 @@ pub struct NewRbacPolicy {
 
 #[derive(Serialize, Deserialize, Debug, Validate)]
 pub struct RbacPolicy {
-    pub rbac_id: Uuid,
-    #[validate(length(min = 1, max = 25))]
+    pub rbac_id: String,
     pub path: String,
-    #[validate(custom = "validate_path_match")]
     pub path_match: String,
-    #[validate(custom = "validate_method_match")]
     pub method: String,
     pub rbac_role: String,
     pub rbac_user: String,
-    #[validate(length(max = 100))]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    pub modified: NaiveDateTime,
+    pub description: String,
+    pub created_by: String,
+    pub created_at: NaiveDateTime,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub modified_by: Option<String>,
-}
-
-#[derive(Serialize, Deserialize, Debug, Validate)]
-pub struct RbacPolicyRequest {
-    pub rbac_id: Uuid,
-    #[validate(length(min = 1, max = 25))]
-    pub path: String,
-    #[validate(custom = "validate_path_match")]
-    pub path_match: String,
-    #[validate(custom = "validate_method_match")]
-    pub method: String,
-    pub rbac_role: String,
-    pub rbac_user: String,
-    #[validate(length(max = 100))]
-    pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub modified_at: Option<NaiveDateTime>,
 }

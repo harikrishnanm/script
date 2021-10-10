@@ -1,35 +1,19 @@
-use core::time::Duration;
-use log::{error, info, trace};
-use sqlx::postgres::PgPoolOptions;
+use crate::error::ScriptError;
+use crate::DataStore;
+use log::*;
+use mongodb::Client;
 use std::env;
 
-use crate::DBPool;
-
-pub async fn init() -> DBPool {
+pub async fn init() -> Result<DataStore, ScriptError> {
     info!("Initializing DB");
 
     let db_url = &env::var("DATABASE_URL").expect("DATABASE_URL should be set");
     trace!("DB URL {}", db_url);
-    let pool = match PgPoolOptions::new()
-        .max_connections(10)
-        .min_connections(3)
-        .connect_timeout(Duration::new(5, 0))
-        .test_before_acquire(true)
-        .connect(db_url)
-        .await
-    {
-        Ok(pool) => {
-            info!("Checking pending db migrations");
-            match sqlx::migrate!("./migrations/").run(&pool).await {
-                Ok(_) => info!("Migrations completed"),
-                Err(e) => panic!("Error running migrations {}", e),
-            }
-            pool
-        }
-        Err(err) => {
-            error!("Error initializing pool {:?}", err);
-            panic!("Could not start pool")
-        }
-    };
-    pool
+
+    let client = Client::with_uri_str(db_url).await.unwrap();
+    let database = client.database("script");
+    Ok(DataStore {
+        client: client,
+        db: database,
+    })
 }

@@ -6,36 +6,41 @@ use actix_web::{
 use dotenv::dotenv;
 use env_logger::Env;
 use log::{debug, info};
-
+use mongodb::{Client, Database};
 use std::collections::HashMap;
 
 use std::sync::Mutex;
 use std::{io::Error, result::Result};
 
-mod asset;
-mod collection;
-mod common;
+//mod asset;
+//mod collection;
+//mod common;
 mod config;
 mod constants;
-mod content;
+//mod content;
 mod db;
 mod error;
-mod file;
-mod folder;
+//mod file;
+//mod folder;
 mod rbac;
 mod redis;
-mod scontent;
-mod site;
-mod taxonomy;
+//mod scontent;
+//mod site;
+//mod taxonomy;
 
-pub type DBPool = sqlx::Pool<sqlx::Postgres>;
 pub type RedisPool = r2d2_redis::r2d2::Pool<r2d2_redis::RedisConnectionManager>;
 pub type RedisConnection = r2d2_redis::r2d2::PooledConnection<r2d2_redis::RedisConnectionManager>;
+
+#[derive(Debug, Clone)]
+pub struct DataStore {
+    pub client: Client,
+    pub db: Database,
+}
 
 use crate::rbac::models::*;
 
 pub struct AppData {
-    db_pool: DBPool,
+    data_store: DataStore,
     redis_pool: RedisPool,
     rbac: Mutex<Rbac>,
     rbac_cache: Mutex<HashMap<String, bool>>,
@@ -56,18 +61,18 @@ async fn main() -> Result<(), Error> {
     info!("Worker threads: {}", &workers);
 
     info!("Connecting to the database");
-    let db_pool = db::init().await;
+    let data_store: DataStore = db::init().await.unwrap();
     info!("Connected to the DB");
 
     info!("Reading RBAC");
 
-    let rbac_result = rbac::load(&db_pool).await.unwrap();
+    let rbac_result = rbac::load(&data_store).await.unwrap();
     let _json_config = JsonConfig::default().limit(128000usize);
 
     let redis_pool = redis::init();
 
     let app_data = web::Data::new(AppData {
-        db_pool: db_pool.clone(),
+        data_store: data_store.clone(),
         redis_pool: redis_pool,
         rbac: Mutex::new(rbac_result),
         rbac_cache: Mutex::new(HashMap::new()),
@@ -82,29 +87,29 @@ async fn main() -> Result<(), Error> {
             .wrap(Logger::default())
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(rbac::save)
-            .service(rbac::update)
+        /*    .service(rbac::update)
             .service(rbac::delete)
             .service(rbac::get_all)
-            .service(site::save)
-            .service(file::upload)
-            .service(file::list)
-            .service(file::get_file)
-            .service(collection::save)
-            .service(collection::get)
-            .service(content::save)
-            .service(content::get)
-            .service(content::update)
-            .service(folder::create_root)
-            .service(folder::create)
-            .service(folder::get)
-            .service(folder::get_root)
-            .service(asset::save)
-            .service(taxonomy::save)
-            .service(taxonomy::save_item)
-            .service(taxonomy::get)
-            .service(taxonomy::list)
-            .service(scontent::get)
-            .service(scontent::save)
+        .service(site::save)
+        .service(file::upload)
+        .service(file::list)
+        .service(file::get_file)
+        .service(collection::save)
+        .service(collection::get)
+        .service(content::save)
+        .service(content::get)
+        .service(content::update)
+        .service(folder::create_root)
+        .service(folder::create)
+        .service(folder::get)
+        .service(folder::get_root)
+        .service(asset::save)
+        .service(taxonomy::save)
+        .service(taxonomy::save_item)
+        .service(taxonomy::get)
+        .service(taxonomy::list)
+        .service(scontent::get)
+        .service(scontent::save)*/
     })
     .workers(workers)
     .bind(addr)?

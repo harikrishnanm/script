@@ -4,13 +4,6 @@ use serde_json::Value;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct NewRawContent {
-    pub name: String,
-    pub mime_type: Option<String>,
-    pub tags: Vec<String>,
-    pub content: String,
-    pub cache_control: Option<String>,
-}
 
 pub struct NewContent {
     pub name: String,

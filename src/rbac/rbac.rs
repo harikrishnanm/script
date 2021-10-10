@@ -1,100 +1,89 @@
-use crate::DBPool;
+use crate::error::ScriptError;
+use crate::rbac::models::*;
+use crate::DataStore;
 use chrono::offset::Utc;
 use log::*;
 
-use sqlx::Error;
+use mongodb::error::ErrorKind;
 
-use crate::rbac::models::*;
+impl RbacPolicyRequest {
+  pub async fn save(
+    self: &Self,
+    data_store: &DataStore,
+    identity: &Identity,
+  ) -> Result<RbacPolicy, ScriptError> {
+    debug!("Sacing new RBAC policy {:?}", self);
 
-impl NewRbacPolicy {
-    pub async fn save(
-        self: &Self,
-        db_pool: &DBPool,
-        identity: &Identity,
-    ) -> Result<RbacPolicy, Error> {
-        debug!("{:?}", self);
+    let description = match &self.description {
+      Some(desc) => desc,
+      None => "",
+    }
+    .to_string();
 
-        let description = match &self.description {
-            Some(desc) => desc,
-            None => "",
-        };
-        let rbac_id = uuid::Uuid::new_v4();
-        match sqlx::query_as!(RbacPolicy,
-      "INSERT INTO rbac(rbac_id, path, path_match, method, rbac_role, rbac_user, description, created_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-          RETURNING rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified_by, modified",
+    let rbac_id = uuid::Uuid::new_v4().to_string();
+    let created_by = String::from(&identity.user);
+    let created_at = Utc::now().naive_utc();
+    let path = String::from(&self.path);
+    let path_match = String::from(&self.path_match);
+    let rbac_user = String::from(&self.rbac_user);
+    let rbac_role = String::from(&self.rbac_role);
+    let method = String::from(&self.method);
+
+    let new_policy = RbacPolicy {
       rbac_id,
-      &self.path,
-      &self.path_match,
-      &self.method,
-      &self.rbac_role,
-      &self.rbac_user,
-      &description,
-      identity.user
-    )
-    .fetch_one(db_pool)
-    .await
-    {
-      Ok(rbac_policy) => Ok(rbac_policy),
-      Err(e) => Err(e),
-    }
-    }
+      created_by,
+      created_at,
+      modified_at: None,
+      modified_by: None,
+      path,
+      path_match,
+      rbac_user,
+      rbac_role,
+      method,
+      description,
+    };
+    let rbac_coll = &data_store.db.collection::<RbacPolicy>("RBAC");
 
-    pub async fn save_tx(
-        self: &Self,
-        tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-        identity: &Identity,
-    ) -> Result<(), Error> {
-        debug!("{:?}", self);
-
-        let description = match &self.description {
-            Some(desc) => desc,
-            None => "",
-        };
-
-        match sqlx::query!(
-      "INSERT INTO rbac(path, path_match, method, rbac_role, rbac_user, description, created_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)",
-      &self.path,
-      &self.path_match,
-      &self.method,
-      &self.rbac_role,
-      &self.rbac_user,
-      &description,
-      identity.user
-    )
-        .execute(tx)
-        .await
-        {
-            Ok(_) => Ok(()),
-            Err(e) => {
-                error!("Error saving rbac {}", e);
-                Err(e)
-            }
+    match rbac_coll.insert_one(&new_policy, None).await {
+      Ok(result) => {
+        debug!("Result from driver {:?}", result);
+        Ok(new_policy)
+      }
+      Err(e) => {
+        error!("Error saving RBAC policy {}", e);
+        match *e.kind {
+          ErrorKind::Write(_write_failure) => {
+            return Err(ScriptError::RbacCreationConflict(
+              "duplicate or conflicting params".to_string(),
+            ));
+          }
+          _ => return Err(ScriptError::UnexpectedError),
         }
+      }
     }
+  }
 }
-
+/*
 impl RbacPolicy {
-    pub fn from_req_for_update(
-        rbac_policy_request: &RbacPolicyRequest,
-        identity: &Identity,
-    ) -> RbacPolicy {
-        RbacPolicy {
-            rbac_id: rbac_policy_request.rbac_id,
-            path: rbac_policy_request.path.clone(),
-            path_match: rbac_policy_request.path_match.clone(),
-            method: rbac_policy_request.method.clone(),
-            rbac_role: rbac_policy_request.rbac_role.clone(),
-            rbac_user: rbac_policy_request.rbac_user.clone(),
-            description: rbac_policy_request.description.clone(),
-            modified: Utc::now().naive_utc(),
-            modified_by: Some(identity.user.clone()),
-        }
+  pub fn from_req_for_update(
+    rbac_policy_request: &RbacPolicyRequest,
+    identity: &Identity,
+  ) -> RbacPolicy {
+    RbacPolicy {
+      rbac_id: rbac_policy_request.rbac_id,
+      path: rbac_policy_request.path.clone(),
+      path_match: rbac_policy_request.path_match.clone(),
+      method: rbac_policy_request.method.clone(),
+      rbac_role: rbac_policy_request.rbac_role.clone(),
+      rbac_user: rbac_policy_request.rbac_user.clone(),
+      description: rbac_policy_request.description.clone(),
+      modified: Utc::now().naive_utc(),
+      modified_by: Some(identity.user.clone()),
     }
+  }
 
-    pub async fn update(self: &Self, db_pool: &DBPool) -> Result<RbacPolicy, Error> {
-        match sqlx::query_as!(RbacPolicy,
+  pub async fn update(self: &Self, db_pool: &DBPool) -> Result<RbacPolicy, Error> {
+    match sqlx::query_as!(RbacPolicy,
       "UPDATE rbac SET path = $1, path_match = $2, method = $3, rbac_role = $4, rbac_user = $5, description = $6, modified_by = $8, modified = $7
         WHERE rbac_id = $9 RETURNING rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified_by, modified",
       &self.path,
@@ -119,5 +108,5 @@ impl RbacPolicy {
         Err(e)
       }
     }
-    }
-}
+  }
+}*/

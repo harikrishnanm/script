@@ -1,5 +1,6 @@
 pub mod models;
 pub mod taxonomy;
+use async_recursion::async_recursion;
 
 use crate::common::utils;
 use crate::error::ScriptError;
@@ -12,117 +13,144 @@ use log::*;
 
 #[get("/site/{site_name}/taxonomy/{taxonomy_name}")]
 pub async fn get(
-  _identity: web::ReqData<Identity>,
-  data: web::Data<AppData>,
-  Path((site_name, taxonomy_name)): Path<(String, String)>,
+    _identity: web::ReqData<Identity>,
+    data: web::Data<AppData>,
+    Path((site_name, taxonomy_name)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
-  let db_pool = &data.db_pool;
+    let db_pool = &data.db_pool;
 
-  match get_taxonomy(db_pool, &taxonomy_name, &site_name).await {
-    Ok(result) => Ok(HttpResponse::Ok().json(result)),
-    Err(_e) => Err(ScriptError::UnexpectedError),
-  }
+    match get_taxonomy(db_pool, &taxonomy_name, &site_name).await {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Err(_e) => Err(ScriptError::UnexpectedError),
+    }
 }
 
 #[get("/site/{site_name}/taxonomy")]
 pub async fn list(
-  _identity: web::ReqData<Identity>,
-  data: web::Data<AppData>,
-  Path(site_name): Path<String>,
+    _identity: web::ReqData<Identity>,
+    data: web::Data<AppData>,
+    Path(site_name): Path<String>,
 ) -> Result<HttpResponse, ScriptError> {
-  let db_pool = &data.db_pool;
+    let db_pool = &data.db_pool;
 
-  match get_taxonomy_list(db_pool, &site_name).await {
-    Ok(result) => Ok(HttpResponse::Ok().json(result)),
-    Err(_e) => Err(ScriptError::UnexpectedError),
-  }
+    match get_taxonomy_list(db_pool, &site_name).await {
+        Ok(result) => Ok(HttpResponse::Ok().json(result)),
+        Err(_e) => Err(ScriptError::UnexpectedError),
+    }
 }
 
 #[post("/site/{site_name}/taxonomy")]
 pub async fn save(
-  identity: web::ReqData<Identity>,
-  data: web::Data<AppData>,
-  new_taxonomy: web::Json<NewTaxonomy>,
-  Path(site_name): Path<String>,
+    identity: web::ReqData<Identity>,
+    data: web::Data<AppData>,
+    new_taxonomy: web::Json<NewTaxonomy>,
+    Path(site_name): Path<String>,
 ) -> Result<HttpResponse, ScriptError> {
-  info!("Got reqest for creating taxonomy {:?}", new_taxonomy.name);
-  trace!("Identity {:?}", identity);
+    info!("Got reqest for creating taxonomy {:?}", new_taxonomy.name);
+    trace!("Identity {:?}", identity);
 
-  let db_pool = &data.db_pool;
+    let db_pool = &data.db_pool;
 
-  match new_taxonomy.save(db_pool, &site_name).await {
-    Ok(taxonomy) => Ok(HttpResponse::Created().json(taxonomy)),
-    Err(_e) => Err(ScriptError::UnexpectedError),
-  }
+    match new_taxonomy.save(db_pool, &site_name).await {
+        Ok(taxonomy) => Ok(HttpResponse::Created().json(taxonomy)),
+        Err(_e) => Err(ScriptError::UnexpectedError),
+    }
 }
 
 #[post("/site/{site_name}/taxonomy/{taxonomy_name}/item")]
 pub async fn save_item(
-  identity: web::ReqData<Identity>,
-  data: web::Data<AppData>,
-  new_taxonomy_item: web::Json<NewTaxonomyItem>,
-  Path((site_name, taxonomy_name)): Path<(String, String)>,
+    identity: web::ReqData<Identity>,
+    data: web::Data<AppData>,
+    new_taxonomy_item: web::Json<NewTaxonomyItem>,
+    Path((site_name, taxonomy_name)): Path<(String, String)>,
 ) -> Result<HttpResponse, ScriptError> {
-  info!(
-    "Got reqest for creating taxonomy item {:?}",
-    new_taxonomy_item.item_name
-  );
-  trace!("Identity {:?}", identity);
+    info!(
+        "Got reqest for creating taxonomy item {:?}",
+        new_taxonomy_item.item_name
+    );
+    trace!("Identity {:?}", identity);
 
-  let db_pool = &data.db_pool;
+    let db_pool = &data.db_pool;
 
-  match new_taxonomy_item
-    .save(db_pool, &site_name, &taxonomy_name)
-    .await
-  {
-    Ok(taxonomy_item) => Ok(HttpResponse::Created().json(taxonomy_item)),
-    Err(_e) => Err(ScriptError::UnexpectedError),
-  }
+    match new_taxonomy_item
+        .save(db_pool, &site_name, &taxonomy_name)
+        .await
+    {
+        Ok(taxonomy_item) => Ok(HttpResponse::Created().json(taxonomy_item)),
+        Err(e) => Err(e),
+    }
 }
 
 pub async fn get_taxonomy_list(
-  db_pool: &DBPool,
-  site_name: &str,
+    db_pool: &DBPool,
+    site_name: &str,
 ) -> Result<Vec<TaxonomyListItem>, ScriptError> {
-  debug!("Getting list of taxonomies for {} ", site_name);
+    debug!("Getting list of taxonomies for {} ", site_name);
 
-  match sqlx::query_as!(
-    TaxonomyListItem,
-    "SELECT taxonomy_id, name FROM taxonomy WHERE site_name =$1",
-    site_name
-  )
-  .fetch_all(db_pool)
-  .await
-  {
-    Ok(result) => Ok(result),
-    Err(_e) => Err(ScriptError::UnexpectedError),
-  }
+    match sqlx::query_as!(
+        TaxonomyListItem,
+        "SELECT taxonomy_id, name FROM taxonomy WHERE site_name =$1",
+        site_name
+    )
+    .fetch_all(db_pool)
+    .await
+    {
+        Ok(result) => Ok(result),
+        Err(_e) => Err(ScriptError::UnexpectedError),
+    }
 }
 
+#[async_recursion]
 pub async fn get_taxonomy(
-  db_pool: &DBPool,
-  taxonomy_name: &str,
-  site_name: &str,
-) -> Result<Vec<TaxonomyItem>, ScriptError> {
-  debug!("Getting taxonomy items for {}", taxonomy_name);
+    db_pool: &DBPool,
+    taxonomy_name: &str,
+    site_name: &str,
+) -> Result<Vec<TaxonomyItemResponse>, ScriptError> {
+    debug!("Getting taxonomy items for {}", taxonomy_name);
 
-  let taxonomy_id = utils::get_taxonomy_id(&taxonomy_name, &site_name, db_pool)
-    .await
-    .unwrap();
+    let taxonomy_id = utils::get_taxonomy_id(&taxonomy_name, &site_name, db_pool)
+        .await
+        .unwrap();
+    debug!("Taxonomy item id {}", taxonomy_id);
 
-  match sqlx::query_as!(
-    TaxonomyItem,
-    "SELECT taxonomy_id, taxonomy_item_id, taxonomy_item.item_name, 
-      item_type, ordinal 
+    match sqlx::query_as!(
+        TaxonomyItem,
+        "SELECT taxonomy_id, taxonomy_item_id, taxonomy_item.item_name, 
+      item_type, ordinal, item_taxonomy_id
       FROM taxonomy_item
       WHERE taxonomy_id = $1
       ORDER BY ordinal ASC",
-    taxonomy_id
-  )
-  .fetch_all(db_pool)
-  .await
-  {
-    Ok(result) => Ok(result),
-    Err(_e) => Err(ScriptError::UnexpectedError),
-  }
+        taxonomy_id
+    )
+    .fetch_all(db_pool)
+    .await
+    {
+        Ok(taxonomy_items) => {
+            let mut result: Vec<TaxonomyItemResponse> = Vec::new();
+            for item in taxonomy_items {
+                //Check if the type is A or O
+
+                let taxonomy_item = match &item.item_type[..] == "O" || &item.item_type[..] == "A" {
+                    false => None,
+                    true => Some(Box::new(
+                        get_taxonomy(db_pool, &item.item_name, site_name)
+                            .await
+                            .unwrap(),
+                    )), //Get child taxonomy
+                };
+                result.push(TaxonomyItemResponse {
+                    item_name: item.item_name,
+                    ordinal: item.ordinal,
+                    item_taxonomy_id: item.item_taxonomy_id,
+                    item_type: item.item_type,
+                    taxonomy_id: item.taxonomy_id,
+                    taxonomy_item: taxonomy_item,
+                    taxonomy_item_id: item.taxonomy_item_id,
+                });
+            }
+
+            Ok(result)
+        }
+        Err(_e) => Err(ScriptError::UnexpectedError),
+    }
 }

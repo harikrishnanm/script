@@ -27,21 +27,6 @@ use models::*;
 use mongodb::options::IndexOptions;
 use mongodb::IndexModel;
 
-pub async fn reload_rbac(data: &AppData) -> Result<(), Error> {
-    debug!("Reloading rbac policies");
-    match load(&data.data_store).await {
-        Ok(rbac) => {
-            debug!("Loaded new RBAC set");
-            *data.rbac.lock().unwrap() = rbac;
-            Ok(())
-        }
-        Err(e) => {
-            error!("Error refreshing data {}", e);
-            Err(e)
-        }
-    }
-}
-/*
 #[get("/admin/rbac/{rbac_id}")]
 pub async fn get_rbac_by_id(
     _identity: ReqData<Identity>,
@@ -52,18 +37,27 @@ pub async fn get_rbac_by_id(
 }
 
 #[get("/admin/rbac")]
-pub async fn get_all(identity: ReqData<Identity>, data: Data<AppData>) -> HttpResponse {
+pub async fn get_all(
+    identity: ReqData<Identity>,
+    data: Data<AppData>,
+) -> Result<HttpResponse, ScriptError> {
     debug!("Getting all rbac entires for {}", identity.user);
-    let result  = match sqlx::query_as!(RbacPolicy, "SELECT rbac_id, path, path_match, method, rbac_role, rbac_user, description, modified, modified_by FROM rbac").fetch_all(&data.db_pool).await {
-    Ok(result) => result,
-    Err(e) => {
-      error!("Error {}", e);
-      return HttpResponse::InternalServerError().finish();
+    let rbac_coll = data.data_store.db.collection::<RbacPolicy>("RBAC");
+    match rbac_coll.find(None, None).await {
+        Ok(cursor) => {
+            let result: Result<Vec<RbacPolicy>, _> = cursor.try_collect().await;
+            match result {
+                Ok(r) => Ok(HttpResponse::Ok().json(r)),
+                Err(e) => {
+                    error!("Error getting RBAC policies {}", e);
+                    Err(ScriptError::UnexpectedError)
+                }
+            }
+        }
+        Err(e) => Err(ScriptError::UnexpectedError),
     }
-  };
-    HttpResponse::Ok().json(result)
 }
-
+/*
 #[delete("/admin/rbac/{rbac_id}")]
 pub async fn delete(
     identity: ReqData<Identity>,
@@ -154,6 +148,25 @@ pub async fn save(
         }
     }
 }
+
+///Reload policies
+///
+pub async fn reload_rbac(data: &AppData) -> Result<(), Error> {
+    debug!("Reloading rbac policies");
+    match load(&data.data_store).await {
+        Ok(rbac) => {
+            debug!("Loaded new RBAC set");
+            *data.rbac.lock().unwrap() = rbac;
+            Ok(())
+        }
+        Err(e) => {
+            error!("Error refreshing data {}", e);
+            Err(e)
+        }
+    }
+}
+
+/// Load the rbac policies from the DB and update the Arc carrying the policies.
 
 pub async fn load(data_store: &DataStore) -> Result<Rbac, Error> {
     debug!("Loading RBAC policies");

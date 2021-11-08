@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(Deserialize, Debug)]
-pub struct NewSite {
+pub struct NewApp {
     pub name: String,
     pub path: String,
     pub slug: Option<String>,
@@ -11,9 +11,9 @@ pub struct NewSite {
     pub cors_enabled: Option<bool>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct Site {
-    pub site_id: Uuid,
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct App {
+    pub app_id: Uuid,
     pub name: String,
     pub path: String,
     pub slug: Option<String>,
@@ -21,5 +21,5 @@ pub struct Site {
     pub cors_enabled: Option<bool>,
     pub created_by: String,
     pub created: NaiveDateTime,
-    pub modified: NaiveDateTime,
+    pub modified: Option<NaiveDateTime>,
 }

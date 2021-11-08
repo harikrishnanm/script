@@ -25,7 +25,7 @@ mod error;
 mod rbac;
 mod redis;
 //mod scontent;
-//mod site;
+mod app;
 //mod taxonomy;
 
 pub type RedisPool = r2d2_redis::r2d2::Pool<r2d2_redis::RedisConnectionManager>;
@@ -88,28 +88,26 @@ async fn main() -> Result<(), Error> {
             .wrap(Logger::new("%a %{User-Agent}i"))
             .service(rbac::save)
             .service(rbac::get_all)
-        /*    .service(rbac::update)
-            .service(rbac::delete)
-        .service(site::save)
-        .service(file::upload)
-        .service(file::list)
-        .service(file::get_file)
-        .service(collection::save)
-        .service(collection::get)
-        .service(content::save)
-        .service(content::get)
-        .service(content::update)
-        .service(folder::create_root)
-        .service(folder::create)
-        .service(folder::get)
-        .service(folder::get_root)
-        .service(asset::save)
-        .service(taxonomy::save)
-        .service(taxonomy::save_item)
-        .service(taxonomy::get)
-        .service(taxonomy::list)
-        .service(scontent::get)
-        .service(scontent::save)*/
+            .service(app::save) /*
+                                .service(file::upload)
+                                .service(file::list)
+                                .service(file::get_file)
+                                .service(collection::save)
+                                .service(collection::get)
+                                .service(content::save)
+                                .service(content::get)
+                                .service(content::update)
+                                .service(folder::create_root)
+                                .service(folder::create)
+                                .service(folder::get)
+                                .service(folder::get_root)
+                                .service(asset::save)
+                                .service(taxonomy::save)
+                                .service(taxonomy::save_item)
+                                .service(taxonomy::get)
+                                .service(taxonomy::list)
+                                .service(scontent::get)
+                                .service(scontent::save)*/
     })
     .workers(workers)
     .bind(addr)?

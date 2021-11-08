@@ -209,23 +209,8 @@ pub async fn load(data_store: &DataStore) -> Result<Rbac, Error> {
         };
         rbac_coll.insert_one(&default, None).await?;
 
-        let mut index_doc = Document::new();
-        index_doc.insert("path", 1);
-        index_doc.insert("path_match", 1);
-        index_doc.insert("method", 1);
-        index_doc.insert("rbac_user", 1);
-        index_doc.insert("rbac_role", 1);
-        let index_options = IndexOptions::builder()
-            .unique(Some(true))
-            .name(Some("rbac_uniq_idx".to_string()))
-            .build();
-
-        let index_model = IndexModel::builder()
-            .keys(index_doc)
-            .options(index_options)
-            .build();
-        rbac_coll.create_index(index_model, None).await?;
-        docs.push(default);
+        
+        
     }
 
     for doc in docs {

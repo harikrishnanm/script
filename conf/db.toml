@@ -1,0 +1,14 @@
+[server]
+db_url = "mongodb+srv://admin:jJ7vgnzwDn4VfxJK@cluster0.ywhsx.mongodb.net/admin?retryWrites=true&w=majority"
+
+[[collection]] 
+name = "RBAC"
+
+
+[[collection]] 
+name = "APP" 
+[[collection.index]]
+name = "app_name_idx"
+fields= ["name"]
+type = [1]
+unique = true
